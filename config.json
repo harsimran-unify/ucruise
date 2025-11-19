@@ -1,0 +1,129 @@
+{
+  "optimization_mode": "route_efficiency",
+  "max_fill_distance_km": 4.0,
+  "merge_distance_km": 2.5,
+  "road_network": {
+    "max_search_radius_km": 5.0,
+    "fallback_search_radius_km": 10.0,
+    "max_detour_ratio": 3.0,
+    "cache_size_limit": 50000,
+    "cache_cleanup_threshold": 40000,
+    "coherence_weights": {
+      "directional_penalty": 0.3,
+      "backtrack_penalty": 0.4,
+      "corridor_bonus": 0.2,
+      "sequence_penalty": 0.1
+    },
+    "distance_validation": {
+      "max_reasonable_ratio": 3.0,
+      "min_road_efficiency": 0.2
+    },
+    "projection": {
+      "tile_size_degrees": 1.0,
+      "use_adaptive_projection": true
+    }
+  },
+  "route_quality": {
+    "corridor_assignment_max_distance_km": 4.0,
+    "cross_corridor_max_distance_km": 1.0,
+    "corridor_bearing_tolerance_degrees": 22.5,
+    "fallback_bearing_tolerance_degrees": 22.5,
+    "monotonic_tolerance_km": 0.2,
+    "max_monotonic_violations_per_route": 1,
+    "monotonic_violation_penalty": 5.0,
+    "emergency_assignment_max_distance_km": 8.0,
+    "require_bearing_match_cross_corridor": true
+  },
+  "dbscan_eps_km": 1.2,
+  "min_samples_dbscan": 2,
+  "max_bearing_difference": 15,
+  "max_allowed_turning_score": 25,
+  "min_util_threshold": 0.4,
+  "low_utilization_threshold": 0.4,
+  "utilization_penalty_per_seat": 1.0,
+  "overflow_penalty_km": 8.0,
+  "distance_issue_threshold_km": 6.0,
+  "swap_improvement_threshold_km": 0.3,
+  "max_swap_iterations": 2,
+  "max_users_for_fallback": 2,
+  "fallback_min_users": 2,
+  "fallback_max_users": 5,
+  "office_latitude": 30.6810489,
+  "office_longitude": 76.7260711,
+  "clustering_method": "adaptive",
+  "min_cluster_size": 2,
+  "use_sweep_algorithm": true,
+  "angular_sectors": 12,
+  "max_users_for_initial_cluster": 6,
+  "max_users_per_cluster": 5,
+  "zigzag_penalty_weight": 0.5,
+  "route_split_turning_threshold": 25,
+  "max_tortuosity_ratio": 1.2,
+  "route_split_consistency_threshold": 0.8,
+  "merge_tortuosity_improvement_required": true,
+  "mode_configs": {
+    "route_efficiency": {
+      "max_bearing_difference": 15,
+      "max_allowed_turning_score": 25,
+      "max_fill_distance_km": 4.0,
+      "merge_distance_km": 2.5,
+      "zigzag_penalty_weight": 0.5,
+      "utilization_penalty_per_seat": 1.0,
+      "aggressive_merging": true,
+      "capacity_weight": 1.0,
+      "direction_weight": 4.0
+    },
+    "balanced_optimization": {
+      "max_bearing_difference": 30,
+      "max_allowed_turning_score": 40,
+      "max_fill_distance_km": 6.0,
+      "merge_distance_km": 3.5,
+      "zigzag_penalty_weight": 2.0,
+      "utilization_penalty_per_seat": 3.0,
+      "aggressive_merging": false,
+      "capacity_weight": 2.5,
+      "direction_weight": 2.5
+    },
+    "capacity_optimization": {
+      "max_bearing_difference": 15,
+      "max_allowed_turning_score": 25,
+      "max_fill_distance_km": 4.0,
+      "merge_distance_km": 2.5,
+      "zigzag_penalty_weight": 0.5,
+      "utilization_penalty_per_seat": 1.0,
+      "aggressive_merging": true,
+      "capacity_weight": 5.0,
+      "direction_weight": 1.0
+    },
+    "female_safety_optimization": {
+      "max_bearing_difference": 45,
+      "max_allowed_turning_score": 60,
+      "max_fill_distance_km": 8.0,
+      "merge_distance_km": 5.0,
+      "zigzag_penalty_weight": 1.0,
+      "utilization_penalty_per_seat": 2.0,
+      "aggressive_merging": false,
+      "capacity_weight": 3.0,
+      "direction_weight": 2.0,
+      "female_rescue_distance_multiplier": 1.5,
+      "min_male_required_for_female_safety": 1,
+      "safety_merge_distance_bonus_km": 2.0,
+      "safety_priority_over_efficiency": true,
+      "allow_female_only_assignment": false
+    }
+  },
+  "route_ordering": {
+    "enable_google_optimization": true,
+    "google_api_rate_limit": 100,
+    "cache_retention_days": 30,
+    "route_cache_file": "route_cache.json",
+    "enable_route_cache": true,
+    "pickup_order_tolerance_minutes": 5,
+    "fallback_to_haversine": true,
+    "ordering_cache_version": 1,
+    "google_directions_api_url": "https://maps.googleapis.com/maps/api/directions/json",
+    "batch_optimization": true,
+    "max_batch_size": 10,
+    "cache_cleanup_interval_hours": 24
+  }
+}

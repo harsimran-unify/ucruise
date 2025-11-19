@@ -1,0 +1,1774 @@
+[
+  {
+    "driver_id": "335464",
+    "vehicle_id": "52",
+    "vehicle_type": 5,
+    "latitude": 30.713510733333333,
+    "longitude": 76.8383156,
+    "assigned_users": [
+      {
+        "user_id": "335333",
+        "lat": 30.7102433,
+        "lng": 76.8394259,
+        "office_distance": 11.32,
+        "first_name": "Kunal",
+        "email": "kunal.b@unifylogisticsolutions.com",
+        "address": "Housing board manimajra light point",
+        "employee_shift": "Evening shift",
+        "shift_type": "1",
+        "last_name": "Bhardwaj",
+        "phone": "7015368189",
+        "pickup_order": 1
+      },
+      {
+        "user_id": "335242",
+        "lat": 30.7087476,
+        "lng": 76.8424893,
+        "office_distance": 11.55,
+        "first_name": "Kritika",
+        "email": "kritika.singla@unifylogisticsolutions.com",
+        "address": "H.No. #184 N.A.C SHIVALIK ENCLAVE, MANIMAJRA",
+        "employee_shift": "Evening shift",
+        "shift_type": "1",
+        "last_name": "Singla",
+        "phone": "79865-31558",
+        "pickup_order": 2
+      }
+    ],
+    "centroid": [
+      30.70949545,
+      76.8409576
+    ],
+    "utilization": 0.4,
+    "turning_score": 89.7233858466034,
+    "tortuosity_ratio": 1.0269060007241186,
+    "direction_consistency": 0.3333333333333333,
+    "first_name": "KHUSHNASIB",
+    "last_name": "SINGH",
+    "email": "",
+    "vehicle_name": "2022",
+    "vehicle_no": "PB01C8462",
+    "capacity": 5,
+    "chasis_no": "MA3JMT31SNB630407",
+    "color": "GRAY",
+    "registration_no": "PB01C8462",
+    "shift_type_id": 2,
+    "cached_order": {
+      "driver_id": "335464",
+      "user_ids": [
+        "335242",
+        "335333"
+      ],
+      "ordered_user_ids": [
+        "335333",
+        "335242"
+      ],
+      "pickup_sequence": [
+        1,
+        2
+      ],
+      "total_distance_km": 14.41,
+      "total_duration_min": 33.7,
+      "calculated_date": "2025-10-24T15:24:02.566220",
+      "algorithm": "google_directions_api"
+    },
+    "route_distance_km": 14.41,
+    "route_duration_min": 33.7,
+    "ordering_source": "cached"
+  },
+  {
+    "driver_id": "335467",
+    "vehicle_id": "55",
+    "vehicle_type": 5,
+    "latitude": 30.695380160000003,
+    "longitude": 76.71819138000001,
+    "assigned_users": [
+      {
+        "user_id": "335393",
+        "lat": 30.687368,
+        "lng": 76.726249,
+        "office_distance": 0.64,
+        "first_name": "Aman",
+        "email": "jerry@unifylogisticsolutions.com",
+        "address": "Near mata Raj kaur Gurudwara, Sector 68 MOhali",
+        "employee_shift": "Evening shift",
+        "shift_type": "1",
+        "last_name": "Guleria",
+        "phone": "7876851882",
+        "pickup_order": 1
+      }
+    ],
+    "centroid": [
+      30.687368,
+      76.726249
+    ],
+    "utilization": 0.2,
+    "turning_score": 0,
+    "tortuosity_ratio": 1.0,
+    "direction_consistency": 1.0,
+    "first_name": "ARSHPREET",
+    "last_name": "SINGH",
+    "email": "",
+    "vehicle_name": "2022",
+    "vehicle_no": "PB01D1910",
+    "capacity": 5,
+    "chasis_no": "MBHCZFB3SNJ320495",
+    "color": "WHITE",
+    "registration_no": "PB01D1501",
+    "shift_type_id": 2,
+    "cached_order": {
+      "driver_id": "335467",
+      "user_ids": [
+        "335393"
+      ],
+      "ordered_user_ids": [
+        "335393"
+      ],
+      "pickup_sequence": [
+        1
+      ],
+      "total_distance_km": 1.27,
+      "total_duration_min": 152.8,
+      "calculated_date": "2025-10-24T15:24:02.567499",
+      "algorithm": "google_directions_api"
+    },
+    "route_distance_km": 1.27,
+    "route_duration_min": 152.8,
+    "ordering_source": "cached"
+  },
+  {
+    "driver_id": "335459",
+    "vehicle_id": "47",
+    "vehicle_type": 7,
+    "latitude": 30.6727404,
+    "longitude": 76.7206652,
+    "assigned_users": [
+      {
+        "user_id": "335379",
+        "lat": 30.700708,
+        "lng": 76.709385,
+        "office_distance": 2.64,
+        "first_name": "Amit",
+        "email": "amit@unifylogisticsolutions.com",
+        "address": "House no.:- 509,Shine Enclave Sector 71 Mohali",
+        "employee_shift": "Evening shift",
+        "shift_type": "1",
+        "last_name": "Kumar",
+        "phone": "7876139339",
+        "pickup_order": 1
+      },
+      {
+        "user_id": "335390",
+        "lat": 30.6977448,
+        "lng": 76.7154429,
+        "office_distance": 2.05,
+        "first_name": "Krish",
+        "email": "Krish@unifylogisticsolutions.com",
+        "address": "House No:- 918 Sector 70 Mohali",
+        "employee_shift": "Evening shift",
+        "shift_type": "1",
+        "last_name": "Raj",
+        "phone": "70185-82144",
+        "pickup_order": 2
+      }
+    ],
+    "centroid": [
+      30.6992264,
+      76.71241395
+    ],
+    "utilization": 0.2857142857142857,
+    "turning_score": 85.04159037295153,
+    "tortuosity_ratio": 1.1147176190944477,
+    "direction_consistency": 0.0,
+    "first_name": "Gurpreet ",
+    "last_name": "Kaur",
+    "email": "",
+    "vehicle_name": "2022",
+    "vehicle_no": "r4r4r4r",
+    "capacity": 7,
+    "chasis_no": "r34r4",
+    "color": "white",
+    "registration_no": "45454577",
+    "shift_type_id": 2,
+    "cached_order": {
+      "driver_id": "335459",
+      "user_ids": [
+        "335379",
+        "335390"
+      ],
+      "ordered_user_ids": [
+        "335379",
+        "335390"
+      ],
+      "pickup_sequence": [
+        1,
+        2
+      ],
+      "total_distance_km": 3.73,
+      "total_duration_min": 11.4,
+      "calculated_date": "2025-10-24T15:24:03.024724",
+      "algorithm": "google_directions_api"
+    },
+    "route_distance_km": 3.73,
+    "route_duration_min": 11.4,
+    "ordering_source": "cached"
+  },
+  {
+    "driver_id": "335460",
+    "vehicle_id": "48",
+    "vehicle_type": 7,
+    "latitude": 30.6498769,
+    "longitude": 76.8066956,
+    "assigned_users": [
+      {
+        "user_id": "335388",
+        "lat": 30.74154,
+        "lng": 76.659569,
+        "office_distance": 9.19,
+        "first_name": "Anmol",
+        "email": "alex@unifylogisticsolutions.com",
+        "address": "35GF Aman Residency landran Road Kharar 140301",
+        "employee_shift": "Evening shift",
+        "shift_type": "1",
+        "last_name": "Sharma",
+        "phone": "6361621886",
+        "pickup_order": 1
+      }
+    ],
+    "centroid": [
+      30.74154,
+      76.659569
+    ],
+    "utilization": 0.14285714285714285,
+    "turning_score": 0,
+    "tortuosity_ratio": 1.0,
+    "direction_consistency": 1.0,
+    "first_name": "PRINKAL",
+    "last_name": "",
+    "email": "",
+    "vehicle_name": "2023",
+    "vehicle_no": "PB01D8244",
+    "capacity": 7,
+    "chasis_no": "MA3B3C62SNF494132",
+    "color": "SILVER",
+    "registration_no": "PB01D8244",
+    "shift_type_id": 2,
+    "cached_order": {
+      "driver_id": "335460",
+      "user_ids": [
+        "335388"
+      ],
+      "ordered_user_ids": [
+        "335388"
+      ],
+      "pickup_sequence": [
+        1
+      ],
+      "total_distance_km": 18.38,
+      "total_duration_min": 2205.9,
+      "calculated_date": "2025-10-24T15:24:03.025826",
+      "algorithm": "google_directions_api"
+    },
+    "route_distance_km": 18.38,
+    "route_duration_min": 2205.9,
+    "ordering_source": "cached"
+  },
+  {
+    "driver_id": "335519",
+    "vehicle_id": "102",
+    "vehicle_type": 5,
+    "latitude": 30.75280075,
+    "longitude": 76.641786,
+    "assigned_users": [
+      {
+        "user_id": "335229",
+        "lat": 30.7543235,
+        "lng": 76.64638,
+        "office_distance": 11.09,
+        "first_name": "Jagjeet",
+        "email": "jimmy@unifylogisticsolutions.com",
+        "address": "House No.#141, Dashmesh Nagar Sector 15 Kharar Near Gurudwara Guru Gobind Singh Sahib, Dashmesh Nagar",
+        "employee_shift": "Evening shift",
+        "shift_type": "1",
+        "last_name": "singh",
+        "phone": "94782-19109",
+        "pickup_order": 1
+      }
+    ],
+    "centroid": [
+      30.7543235,
+      76.64638
+    ],
+    "utilization": 0.2,
+    "turning_score": 0,
+    "tortuosity_ratio": 1.0,
+    "direction_consistency": 1.0,
+    "first_name": "saraj",
+    "last_name": "thakur",
+    "email": "saraja@yopmail.com",
+    "vehicle_name": "2022",
+    "vehicle_no": "PB01D1961",
+    "capacity": 5,
+    "chasis_no": "MBHCZFB3SNJ320461",
+    "color": "WHITE",
+    "registration_no": "PB01D1561",
+    "shift_type_id": 2,
+    "cached_order": {
+      "driver_id": "335519",
+      "user_ids": [
+        "335229"
+      ],
+      "ordered_user_ids": [
+        "335229"
+      ],
+      "pickup_sequence": [
+        1
+      ],
+      "total_distance_km": 22.18,
+      "total_duration_min": 2661.6,
+      "calculated_date": "2025-10-24T15:24:03.026607",
+      "algorithm": "google_directions_api"
+    },
+    "route_distance_km": 22.18,
+    "route_duration_min": 2661.6,
+    "ordering_source": "cached"
+  },
+  {
+    "driver_id": "335518",
+    "vehicle_id": "101",
+    "vehicle_type": 5,
+    "latitude": 30.7221204,
+    "longitude": 76.67010826,
+    "assigned_users": [
+      {
+        "user_id": "335298",
+        "lat": 30.7224253,
+        "lng": 76.684209,
+        "office_distance": 6.03,
+        "first_name": "Sariya",
+        "email": "jordan.woods@unifylogisticsolutions.com",
+        "address": "House No:- #1739, Sector 74A, Connaught Residency, Mohali",
+        "employee_shift": "Evening shift",
+        "shift_type": "1",
+        "last_name": "Yagnik Devjibhai",
+        "phone": "8320050728",
+        "pickup_order": 1
+      },
+      {
+        "user_id": "335250",
+        "lat": 30.7289577,
+        "lng": 76.6720283,
+        "office_distance": 7.36,
+        "first_name": "Rashmi",
+        "email": "diana.white@unifylogisticsolutions.com",
+        "address": "H. No. 10, Raman Enclave, Near SBP homes, Sector 117, Mohali, 140307",
+        "employee_shift": "Evening shift",
+        "shift_type": "1",
+        "last_name": "Gupta",
+        "phone": "9780959838",
+        "pickup_order": 2
+      }
+    ],
+    "centroid": [
+      30.7256915,
+      76.67811864999999
+    ],
+    "utilization": 0.4,
+    "turning_score": 156.46509869177623,
+    "tortuosity_ratio": 1.3339212727627405,
+    "direction_consistency": 0.6666666666666666,
+    "first_name": "bablue",
+    "last_name": "sharma",
+    "email": "babluk@yopmail.com",
+    "vehicle_name": "2022",
+    "vehicle_no": "PB01D1960",
+    "capacity": 5,
+    "chasis_no": "MBHCZFB3SNJ320460",
+    "color": "WHITE",
+    "registration_no": "PB01D1560",
+    "shift_type_id": 2,
+    "cached_order": {
+      "driver_id": "335518",
+      "user_ids": [
+        "335250",
+        "335298"
+      ],
+      "ordered_user_ids": [
+        "335298",
+        "335250"
+      ],
+      "pickup_sequence": [
+        1,
+        2
+      ],
+      "total_distance_km": 6.6,
+      "total_duration_min": 15.9,
+      "calculated_date": "2025-10-24T15:24:03.640704",
+      "algorithm": "google_directions_api"
+    },
+    "route_distance_km": 6.6,
+    "route_duration_min": 15.9,
+    "ordering_source": "cached"
+  },
+  {
+    "driver_id": "335461",
+    "vehicle_id": "49",
+    "vehicle_type": 7,
+    "latitude": 30.6425496,
+    "longitude": 76.8173359,
+    "assigned_users": [
+      {
+        "user_id": "335397",
+        "lat": 30.709019,
+        "lng": 76.656804,
+        "office_distance": 7.27,
+        "first_name": "Nandini",
+        "email": "naya.williams@unifylogisticsolutions.com",
+        "address": "House No:- G142, Locality:- Ansal API, Street No :- G block, Landmark:- Near AWHO, Sector:- 114, Mohali",
+        "employee_shift": "Evening shift",
+        "shift_type": "1",
+        "last_name": "Verma",
+        "phone": "9805058676",
+        "pickup_order": 1
+      },
+      {
+        "user_id": "335255",
+        "lat": 30.7202,
+        "lng": 76.6575,
+        "office_distance": 7.81,
+        "first_name": "Sakshi",
+        "email": "nicole.adler2@unifylogisticsolutions.com",
+        "address": "Flat no 2130, Tower elina 4, City of dreams SBP, Sector 116, Sante majra kharar , Sas nagar Mohali Punjab 140301",
+        "employee_shift": "Evening shift",
+        "shift_type": "1",
+        "last_name": "",
+        "phone": "97792-09600",
+        "pickup_order": 2
+      }
+    ],
+    "centroid": [
+      30.7146095,
+      76.657152
+    ],
+    "utilization": 0.2857142857142857,
+    "turning_score": 92.38399175508096,
+    "tortuosity_ratio": 1.050800601306877,
+    "direction_consistency": 0.3333333333333333,
+    "first_name": "Ranjeet",
+    "last_name": "Soni",
+    "email": "",
+    "vehicle_name": "2022",
+    "vehicle_no": "PB01C8244",
+    "capacity": 7,
+    "chasis_no": "MA3BNC22SMG365288",
+    "color": "WHITE",
+    "registration_no": "PB01C8244",
+    "shift_type_id": 2,
+    "cached_order": {
+      "driver_id": "335461",
+      "user_ids": [
+        "335255",
+        "335397"
+      ],
+      "ordered_user_ids": [
+        "335397",
+        "335255"
+      ],
+      "pickup_sequence": [
+        2,
+        1
+      ],
+      "total_distance_km": 9.98,
+      "total_duration_min": 19.4,
+      "calculated_date": "2025-10-24T15:24:04.335259",
+      "algorithm": "google_directions_api"
+    },
+    "route_distance_km": 9.98,
+    "route_duration_min": 19.4,
+    "ordering_source": "cached"
+  },
+  {
+    "driver_id": "335509",
+    "vehicle_id": "92",
+    "vehicle_type": 7,
+    "latitude": 30.73659955,
+    "longitude": 76.71683145,
+    "assigned_users": [
+      {
+        "user_id": "335337",
+        "lat": 30.7357778,
+        "lng": 76.7160278,
+        "office_distance": 6.09,
+        "first_name": "Gourav",
+        "email": "andy.clark@unifylogisticsolutions.com",
+        "address": "House No. #478, phase 6, Street backside petrol pump, MOhali",
+        "employee_shift": "Evening shift",
+        "shift_type": "1",
+        "last_name": "Davet",
+        "phone": "7009188945",
+        "pickup_order": 1
+      },
+      {
+        "user_id": "335251",
+        "lat": 30.7374213,
+        "lng": 76.7176351,
+        "office_distance": 6.25,
+        "first_name": "Nikhil",
+        "email": "berlin.white@unifylogisticsolutions.com",
+        "address": "House No. :- 2797 Sector 56 Chandigarh Near CNG petrol Pump",
+        "employee_shift": "Evening shift",
+        "shift_type": "1",
+        "last_name": "",
+        "phone": "98880-30820",
+        "pickup_order": 2
+      }
+    ],
+    "centroid": [
+      30.73659955,
+      76.71683145
+    ],
+    "utilization": 0.2857142857142857,
+    "turning_score": 156.37203552152673,
+    "tortuosity_ratio": 1.0710679850398712,
+    "direction_consistency": 0.3333333333333333,
+    "first_name": "Shahile",
+    "last_name": "sharma",
+    "email": "shahilsharma.k@yopmail.com",
+    "vehicle_name": "2022",
+    "vehicle_no": "PB01D1951",
+    "capacity": 5,
+    "chasis_no": "MBHCZFB3SNJ320451",
+    "color": "WHITE",
+    "registration_no": "PB01D1551",
+    "shift_type_id": 2,
+    "cached_order": {
+      "driver_id": "335509",
+      "user_ids": [
+        "335251",
+        "335337"
+      ],
+      "ordered_user_ids": [
+        "335337",
+        "335251"
+      ],
+      "pickup_sequence": [
+        1,
+        2
+      ],
+      "total_distance_km": 9.0,
+      "total_duration_min": 21.5,
+      "calculated_date": "2025-10-24T15:24:05.050565",
+      "algorithm": "google_directions_api"
+    },
+    "route_distance_km": 9.0,
+    "route_duration_min": 21.5,
+    "ordering_source": "cached"
+  },
+  {
+    "driver_id": "335521",
+    "vehicle_id": "104",
+    "vehicle_type": 5,
+    "latitude": 30.7498676,
+    "longitude": 76.6411094,
+    "assigned_users": [
+      {
+        "user_id": "335340",
+        "lat": 30.7584,
+        "lng": 76.6234,
+        "office_distance": 12.99,
+        "first_name": "SWAYAM",
+        "email": "ron.tuffin@unifylogisticsolutions.com",
+        "address": "SECTOR 126, WESTERN TOWER, NIJJER CHOWK",
+        "employee_shift": "Evening shift",
+        "shift_type": "1",
+        "last_name": "BHAKUNI",
+        "phone": "95178-83889",
+        "pickup_order": 1
+      },
+      {
+        "user_id": "335372",
+        "lat": 30.75,
+        "lng": 76.63,
+        "office_distance": 11.9,
+        "first_name": "Abhishek",
+        "email": "avi@unifylogisticsolutions.com",
+        "address": "43C, near gurudwara Dukhniwaran, Ranjit Nagat, Garden Colony, Kharar, Punjab",
+        "employee_shift": "Evening shift",
+        "shift_type": "1",
+        "last_name": "",
+        "phone": "9463430972",
+        "pickup_order": 2
+      },
+      {
+        "user_id": "335316",
+        "lat": 30.751278,
+        "lng": 76.637192,
+        "office_distance": 11.48,
+        "first_name": "Riya",
+        "email": "samantha@unifylogisticsolutions.com",
+        "address": "House No. #4159, GBP Camellia, Streert 4159, Near Amayra City Center Kharar  / Shivjot",
+        "employee_shift": "Evening shift",
+        "shift_type": "1",
+        "last_name": "Chauhan",
+        "phone": "7253063324",
+        "pickup_order": 3
+      }
+    ],
+    "centroid": [
+      30.753226,
+      76.63019733333333
+    ],
+    "utilization": 0.6,
+    "turning_score": 89.0467236650067,
+    "tortuosity_ratio": 1.15079016062755,
+    "direction_consistency": 0.25,
+    "first_name": "john",
+    "last_name": "ibrahim",
+    "email": "johnib@yopmail.com",
+    "vehicle_name": "2022",
+    "vehicle_no": "PB01D1963",
+    "capacity": 5,
+    "chasis_no": "MBHCZFB3SNJ320463",
+    "color": "WHITE",
+    "registration_no": "PB01D1563",
+    "shift_type_id": 2,
+    "cached_order": {
+      "driver_id": "335521",
+      "user_ids": [
+        "335316",
+        "335340",
+        "335372"
+      ],
+      "ordered_user_ids": [
+        "335340",
+        "335372",
+        "335316"
+      ],
+      "pickup_sequence": [
+        3,
+        2,
+        1
+      ],
+      "total_distance_km": 15.26,
+      "total_duration_min": 31.4,
+      "calculated_date": "2025-10-24T15:24:05.874120",
+      "algorithm": "google_directions_api"
+    },
+    "route_distance_km": 15.26,
+    "route_duration_min": 31.4,
+    "ordering_source": "cached"
+  },
+  {
+    "driver_id": "335483",
+    "vehicle_id": "66",
+    "vehicle_type": 5,
+    "latitude": 30.7046486,
+    "longitude": 76.7178726,
+    "assigned_users": [
+      {
+        "user_id": "335334",
+        "lat": 30.70413,
+        "lng": 76.71868,
+        "office_distance": 2.59,
+        "first_name": "Isha",
+        "email": "bella.watson@unifylogisticsolutions.com",
+        "address": "H no. 2717 (Phase 7), Sector 61, Mohali",
+        "employee_shift": "Evening shift",
+        "shift_type": "1",
+        "last_name": "Mattu",
+        "phone": "",
+        "pickup_order": 1
+      },
+      {
+        "user_id": "335407",
+        "lat": 30.7084581,
+        "lng": 76.7243389,
+        "office_distance": 2.98,
+        "first_name": "Anchal",
+        "email": "anna@unifylogisticsolutions.com",
+        "address": "House No. 122, Phase 7, Sector 61, Mohali, Punjab - 160059, (Landmark: Backside of Chawla Hospital)",
+        "employee_shift": "Evening shift",
+        "shift_type": "1",
+        "last_name": "Thakur",
+        "phone": "8580410458",
+        "pickup_order": 2
+      },
+      {
+        "user_id": "335324",
+        "lat": 30.7093683,
+        "lng": 76.7190189,
+        "office_distance": 3.15,
+        "first_name": "Harmanjit",
+        "email": "Paul.Corma2c@unifylogisticsolutions.com",
+        "address": "House No. #1353, Phase 3B2, NEAR HANUMAN MANDIR, Sector 60 SAS Nagar Mohali - 160059",
+        "employee_shift": "Evening shift",
+        "shift_type": "1",
+        "last_name": "Singh",
+        "phone": "8708116607",
+        "pickup_order": 3
+      }
+    ],
+    "centroid": [
+      30.7073188,
+      76.72067926666666
+    ],
+    "utilization": 0.6,
+    "turning_score": 106.23332591292564,
+    "tortuosity_ratio": 1.3617882019302325,
+    "direction_consistency": 0.5,
+    "first_name": "Mohammad",
+    "last_name": "Ishaq",
+    "email": "mdishiq@yopmail.com",
+    "vehicle_name": "2022",
+    "vehicle_no": "PB01C9839",
+    "capacity": 5,
+    "chasis_no": "MA3TFC62SNA123930",
+    "color": "WHITE",
+    "registration_no": "PB01D1512",
+    "shift_type_id": 2,
+    "cached_order": {
+      "driver_id": "335483",
+      "user_ids": [
+        "335324",
+        "335334",
+        "335407"
+      ],
+      "ordered_user_ids": [
+        "335334",
+        "335407",
+        "335324"
+      ],
+      "pickup_sequence": [
+        1,
+        2,
+        3
+      ],
+      "total_distance_km": 4.08,
+      "total_duration_min": 11.3,
+      "calculated_date": "2025-10-24T15:24:06.170400",
+      "algorithm": "google_directions_api"
+    },
+    "route_distance_km": 4.08,
+    "route_duration_min": 11.3,
+    "ordering_source": "cached"
+  },
+  {
+    "driver_id": "335478",
+    "vehicle_id": "61",
+    "vehicle_type": 7,
+    "latitude": 30.6881808,
+    "longitude": 76.7062336,
+    "assigned_users": [
+      {
+        "user_id": "335409",
+        "lat": 30.68695,
+        "lng": 76.7212,
+        "office_distance": 0.74,
+        "first_name": "Jasmeet",
+        "email": "None",
+        "address": "#312, block 17, The united co-op housing society, Landmark- Opposite army institute\u00a0of\u00a0law. sector 68 Mohali",
+        "employee_shift": "Evening shift",
+        "shift_type": "1",
+        "last_name": "Kaur",
+        "phone": "6280643903",
+        "pickup_order": 1
+      }
+    ],
+    "centroid": [
+      30.68695,
+      76.7212
+    ],
+    "utilization": 0.14285714285714285,
+    "turning_score": 0,
+    "tortuosity_ratio": 1.0,
+    "direction_consistency": 1.0,
+    "first_name": "Sansarjeet",
+    "last_name": "singh",
+    "email": "saraj@yopmail.com",
+    "vehicle_name": "2023",
+    "vehicle_no": "PB01E0862",
+    "capacity": 7,
+    "chasis_no": "MA3BNC62SPL708221",
+    "color": "WHITE",
+    "registration_no": "PB01D1507",
+    "shift_type_id": 2,
+    "cached_order": {
+      "driver_id": "335478",
+      "user_ids": [
+        "335409"
+      ],
+      "ordered_user_ids": [
+        "335409"
+      ],
+      "pickup_sequence": [
+        1
+      ],
+      "total_distance_km": 1.47,
+      "total_duration_min": 176.9,
+      "calculated_date": "2025-10-24T15:24:06.171715",
+      "algorithm": "google_directions_api"
+    },
+    "route_distance_km": 1.47,
+    "route_duration_min": 176.9,
+    "ordering_source": "cached"
+  },
+  {
+    "driver_id": "335485",
+    "vehicle_id": "68",
+    "vehicle_type": 5,
+    "latitude": 30.703796666666666,
+    "longitude": 76.74669733333333,
+    "assigned_users": [
+      {
+        "user_id": "335403",
+        "lat": 30.70629,
+        "lng": 76.754592,
+        "office_distance": 3.88,
+        "first_name": "Anekait",
+        "email": "ross@unifylogisticsolutions.com",
+        "address": "House no. -3205/1 , Landmark - chandigarh baptist school , Sector -45d , City-\u00a0Chandigarh",
+        "employee_shift": "Evening shift",
+        "shift_type": "1",
+        "last_name": "Jain",
+        "phone": "9915731386",
+        "pickup_order": 1
+      },
+      {
+        "user_id": "335382",
+        "lat": 30.71,
+        "lng": 76.75,
+        "office_distance": 3.91,
+        "first_name": "Hridesh",
+        "email": "matt@unifylogisticsolutions.com",
+        "address": "3301/1, near baba diary last line, Baptist School Sector 45D Chandigarh - 160047",
+        "employee_shift": "Evening shift",
+        "shift_type": "1",
+        "last_name": "Kumar",
+        "phone": "7888926171",
+        "pickup_order": 2
+      }
+    ],
+    "centroid": [
+      30.708145000000002,
+      76.752296
+    ],
+    "utilization": 0.4,
+    "turning_score": 106.78938274816409,
+    "tortuosity_ratio": 1.1542391938303949,
+    "direction_consistency": 0.3333333333333333,
+    "first_name": "Gulfam",
+    "last_name": "khan",
+    "email": "gukfam@yopmail.com",
+    "vehicle_name": "2022",
+    "vehicle_no": "PB01D0741",
+    "capacity": 5,
+    "chasis_no": "MA3RFL41SNF381451",
+    "color": "WHITE",
+    "registration_no": "PB01D1514",
+    "shift_type_id": 2,
+    "cached_order": {
+      "driver_id": "335485",
+      "user_ids": [
+        "335382",
+        "335403"
+      ],
+      "ordered_user_ids": [
+        "335403",
+        "335382"
+      ],
+      "pickup_sequence": [
+        1,
+        2
+      ],
+      "total_distance_km": 5.55,
+      "total_duration_min": 12.9,
+      "calculated_date": "2025-10-24T15:24:06.892379",
+      "algorithm": "google_directions_api"
+    },
+    "route_distance_km": 5.55,
+    "route_duration_min": 12.9,
+    "ordering_source": "cached"
+  },
+  {
+    "driver_id": "335517",
+    "vehicle_id": "100",
+    "vehicle_type": 5,
+    "latitude": 30.7385453,
+    "longitude": 76.6646642,
+    "assigned_users": [
+      {
+        "user_id": "335265",
+        "lat": 30.7403753,
+        "lng": 76.6717004,
+        "office_distance": 8.33,
+        "first_name": "Ankush",
+        "email": "andy.thomas@unifylogisticsolutions.com",
+        "address": "#237 Desu Majra colony, near Auston gym,\u00a0 Kharar 140301",
+        "employee_shift": "Evening shift",
+        "shift_type": "1",
+        "last_name": "",
+        "phone": "8059906989",
+        "pickup_order": 1
+      },
+      {
+        "user_id": "335808",
+        "lat": 30.7382187,
+        "lng": 76.6636448,
+        "office_distance": 8.66,
+        "first_name": "Shiva",
+        "email": "Lambashiva42@gmail.com",
+        "address": "PMQ7+7FJ, LIC Colony, Sector 4, Model Town, Sahibzada Ajit Singh Nagar, Mundi Kharar, Punjab 140301, India",
+        "employee_shift": "Evening shift",
+        "shift_type": "1",
+        "last_name": "Lamba",
+        "phone": "(734) 722-7189",
+        "pickup_order": 2
+      },
+      {
+        "user_id": "335319",
+        "lat": 30.7340472,
+        "lng": 76.6637426,
+        "office_distance": 8.32,
+        "first_name": "Jagjeet",
+        "email": "julia@unifylogisticsolutions.com",
+        "address": "House No:- #1036/C, ward no. - 4, Chhaju Majra Colony, Nijjer Sector 126 mundi\u00a0Kharar",
+        "employee_shift": "Evening shift",
+        "shift_type": "1",
+        "last_name": "Kaur",
+        "phone": "8557096543 / 9780429864",
+        "pickup_order": 3
+      },
+      {
+        "user_id": "335315",
+        "lat": 30.732165,
+        "lng": 76.6841697,
+        "office_distance": 6.89,
+        "first_name": "Rajat",
+        "email": "alan.white@unifylogisticsolutions.com",
+        "address": "House No.:- #194, Green Enclave TDI City Setor 118 Mohali",
+        "employee_shift": "Evening shift",
+        "shift_type": "1",
+        "last_name": "",
+        "phone": "7876891296",
+        "pickup_order": 4
+      },
+      {
+        "user_id": "335398",
+        "lat": 30.73,
+        "lng": 76.68,
+        "office_distance": 6.94,
+        "first_name": "Chumphila",
+        "email": "Chum.taylor@unifylogisticsolutions.com",
+        "address": "House No. :- 2005, Acme Floors, TDI City, Landran, Sector 111, Mohali Punjab",
+        "employee_shift": "Evening shift",
+        "shift_type": "1",
+        "last_name": "Bhutia",
+        "phone": "7908941938",
+        "pickup_order": 5
+      }
+    ],
+    "centroid": [
+      30.73496124,
+      76.6726515
+    ],
+    "utilization": 1.0,
+    "turning_score": 81.14065300160999,
+    "tortuosity_ratio": 1.5509990198374752,
+    "direction_consistency": 0.5,
+    "first_name": "Akhtar",
+    "last_name": "Alam",
+    "email": "aktar.ali@yopmail.com",
+    "vehicle_name": "2022",
+    "vehicle_no": "PB01D1959",
+    "capacity": 5,
+    "chasis_no": "MBHCZFB3SNJ320459",
+    "color": "WHITE",
+    "registration_no": "PB01D1559",
+    "shift_type_id": 2,
+    "cached_order": {
+      "driver_id": "335517",
+      "user_ids": [
+        "335265",
+        "335315",
+        "335319",
+        "335398",
+        "335808"
+      ],
+      "ordered_user_ids": [
+        "335265",
+        "335808",
+        "335319",
+        "335315",
+        "335398"
+      ],
+      "pickup_sequence": [
+        4,
+        5,
+        1,
+        2,
+        3
+      ],
+      "total_distance_km": 9.18,
+      "total_duration_min": 19.7,
+      "calculated_date": "2025-10-24T15:24:07.562442",
+      "algorithm": "google_directions_api"
+    },
+    "route_distance_km": 9.18,
+    "route_duration_min": 19.7,
+    "ordering_source": "cached"
+  },
+  {
+    "driver_id": "335457",
+    "vehicle_id": "45",
+    "vehicle_type": 7,
+    "latitude": 30.6727404,
+    "longitude": 76.7206652,
+    "assigned_users": [
+      {
+        "user_id": "335320",
+        "lat": 30.7215413,
+        "lng": 76.8330316,
+        "office_distance": 11.17,
+        "first_name": "Manish",
+        "email": "eric@unifylogisticsolutions.com",
+        "address": "House no. #219/1, Landmark fouji dhaba,Manimajra Town, Sector 13 chandigarh",
+        "employee_shift": "Evening shift",
+        "shift_type": "1",
+        "last_name": "Kumar Rana",
+        "phone": "8351042236",
+        "pickup_order": 1
+      }
+    ],
+    "centroid": [
+      30.7215413,
+      76.8330316
+    ],
+    "utilization": 0.14285714285714285,
+    "turning_score": 0,
+    "tortuosity_ratio": 1.0,
+    "direction_consistency": 1.0,
+    "first_name": "Ram ",
+    "last_name": "Jeevan",
+    "email": "",
+    "vehicle_name": "2022",
+    "vehicle_no": "454rt4",
+    "capacity": 7,
+    "chasis_no": "3434",
+    "color": "red",
+    "registration_no": "54545",
+    "shift_type_id": 1,
+    "cached_order": {
+      "driver_id": "335457",
+      "user_ids": [
+        "335320"
+      ],
+      "ordered_user_ids": [
+        "335320"
+      ],
+      "pickup_sequence": [
+        1
+      ],
+      "total_distance_km": 22.34,
+      "total_duration_min": 2680.3,
+      "calculated_date": "2025-10-24T15:24:07.563807",
+      "algorithm": "google_directions_api"
+    },
+    "route_distance_km": 22.34,
+    "route_duration_min": 2680.3,
+    "ordering_source": "cached"
+  },
+  {
+    "driver_id": "335471",
+    "vehicle_id": "59",
+    "vehicle_type": 5,
+    "latitude": 30.6881808,
+    "longitude": 76.7062336,
+    "assigned_users": [
+      {
+        "user_id": "335331",
+        "lat": 30.68389,
+        "lng": 76.7128,
+        "office_distance": 1.27,
+        "first_name": "Aditya",
+        "email": "eddy.white@unifylogisticsolutions.com",
+        "address": "House No. 256, Sector-78, Mohali \u2013 140308",
+        "employee_shift": "Evening shift",
+        "shift_type": "1",
+        "last_name": "Panwar",
+        "phone": "90589-30889",
+        "pickup_order": 1
+      },
+      {
+        "user_id": "335314",
+        "lat": 30.6879257,
+        "lng": 76.7104596,
+        "office_distance": 1.63,
+        "first_name": "Nandita",
+        "email": "krystal@unifylogisticsolutions.com",
+        "address": "House no. 88, sector 78, Mohali.",
+        "employee_shift": "Evening shift",
+        "shift_type": "1",
+        "last_name": "Brar",
+        "phone": "7347493023",
+        "pickup_order": 2
+      },
+      {
+        "user_id": "335406",
+        "lat": 30.6851316,
+        "lng": 76.7042632,
+        "office_distance": 2.1,
+        "first_name": "Karandeep",
+        "email": "karan@unifylogisticsolutions.com",
+        "address": "House No:- 4002-C, Locality:- City apartments society , Landmark:- near sentinel public school, Sector:- 78 Mohali",
+        "employee_shift": "Evening shift",
+        "shift_type": "1",
+        "last_name": "Singh",
+        "phone": "7986883566",
+        "pickup_order": 3
+      }
+    ],
+    "centroid": [
+      30.685649100000003,
+      76.70917426666666
+    ],
+    "utilization": 0.6,
+    "turning_score": 128.8698959992823,
+    "tortuosity_ratio": 1.9776807812223964,
+    "direction_consistency": 0.5,
+    "first_name": "Meghnath",
+    "last_name": "kumar",
+    "email": "",
+    "vehicle_name": "2023",
+    "vehicle_no": "PB01D5310",
+    "capacity": 5,
+    "chasis_no": "MA3JMTB1SPE914711",
+    "color": "WHITE",
+    "registration_no": "PB01D1505",
+    "shift_type_id": 2,
+    "cached_order": {
+      "driver_id": "335471",
+      "user_ids": [
+        "335314",
+        "335331",
+        "335406"
+      ],
+      "ordered_user_ids": [
+        "335331",
+        "335314",
+        "335406"
+      ],
+      "pickup_sequence": [
+        1,
+        2,
+        3
+      ],
+      "total_distance_km": 1.88,
+      "total_duration_min": 5.3,
+      "calculated_date": "2025-10-24T15:24:08.017043",
+      "algorithm": "google_directions_api"
+    },
+    "route_distance_km": 1.88,
+    "route_duration_min": 5.3,
+    "ordering_source": "cached"
+  },
+  {
+    "driver_id": "335477",
+    "vehicle_id": "60",
+    "vehicle_type": 5,
+    "latitude": 30.7375409,
+    "longitude": 76.6978934,
+    "assigned_users": [
+      {
+        "user_id": "335308",
+        "lat": 30.6934,
+        "lng": 76.6988,
+        "office_distance": 2.9,
+        "first_name": "Kirandeep",
+        "email": "Elina.Smith2@unifylogisticsolutions.com",
+        "address": "Burj Hamira Building, near Rai Clinic landmark, Sohana, Sector 77, Mohali",
+        "employee_shift": "Evening shift",
+        "shift_type": "1",
+        "last_name": "Kaur",
+        "phone": "7696465206",
+        "pickup_order": 1
+      }
+    ],
+    "centroid": [
+      30.6934,
+      76.6988
+    ],
+    "utilization": 0.2,
+    "turning_score": 0,
+    "tortuosity_ratio": 1.0,
+    "direction_consistency": 1.0,
+    "first_name": "Rishi",
+    "last_name": "",
+    "email": "rishi@yopmail.com",
+    "vehicle_name": "2022",
+    "vehicle_no": "PB79A1321",
+    "capacity": 5,
+    "chasis_no": "Malb351CLNM335246",
+    "color": "WHITE",
+    "registration_no": "PB01D1506",
+    "shift_type_id": 2,
+    "cached_order": {
+      "driver_id": "335477",
+      "user_ids": [
+        "335308"
+      ],
+      "ordered_user_ids": [
+        "335308"
+      ],
+      "pickup_sequence": [
+        1
+      ],
+      "total_distance_km": 5.79,
+      "total_duration_min": 695.1,
+      "calculated_date": "2025-10-24T15:24:08.018451",
+      "algorithm": "google_directions_api"
+    },
+    "route_distance_km": 5.79,
+    "route_duration_min": 695.1,
+    "ordering_source": "cached"
+  },
+  {
+    "driver_id": "335462",
+    "vehicle_id": "50",
+    "vehicle_type": 7,
+    "latitude": 30.6425496,
+    "longitude": 76.8173359,
+    "assigned_users": [
+      {
+        "user_id": "335317",
+        "lat": 30.7413698,
+        "lng": 76.6374395,
+        "office_distance": 10.75,
+        "first_name": "Pankaj",
+        "email": "max.evans@unifylogisticsolutions.com",
+        "address": "House No. #112, Golden City Near Hari Enclave Near Anaj Mandi Sector 10 Kharar -140301",
+        "employee_shift": "Evening shift",
+        "shift_type": "1",
+        "last_name": "",
+        "phone": "8288837831",
+        "pickup_order": 1
+      }
+    ],
+    "centroid": [
+      30.7413698,
+      76.6374395
+    ],
+    "utilization": 0.14285714285714285,
+    "turning_score": 0,
+    "tortuosity_ratio": 1.0,
+    "direction_consistency": 1.0,
+    "first_name": "SWARGJEET",
+    "last_name": "SONI",
+    "email": "",
+    "vehicle_name": "2022",
+    "vehicle_no": "PB01C9298",
+    "capacity": 7,
+    "chasis_no": "MA3BNC22SMJ389043",
+    "color": "WHITE",
+    "registration_no": "PB01C9298",
+    "shift_type_id": 2,
+    "cached_order": {
+      "driver_id": "335462",
+      "user_ids": [
+        "335317"
+      ],
+      "ordered_user_ids": [
+        "335317"
+      ],
+      "pickup_sequence": [
+        1
+      ],
+      "total_distance_km": 21.49,
+      "total_duration_min": 2579.3,
+      "calculated_date": "2025-10-24T15:24:08.019468",
+      "algorithm": "google_directions_api"
+    },
+    "route_distance_km": 21.49,
+    "route_duration_min": 2579.3,
+    "ordering_source": "cached"
+  },
+  {
+    "driver_id": "335463",
+    "vehicle_id": "51",
+    "vehicle_type": 5,
+    "latitude": 30.707877,
+    "longitude": 76.783382,
+    "assigned_users": [
+      {
+        "user_id": "335321",
+        "lat": 30.7168089,
+        "lng": 76.7786791,
+        "office_distance": 6.39,
+        "first_name": "Aadi",
+        "email": "victor@unifylogisticsolutions.com",
+        "address": "House No. #2748, Near Valmiki Mandir, Sector 20C, Chandigarh",
+        "employee_shift": "Evening shift",
+        "shift_type": "1",
+        "last_name": "",
+        "phone": "9877761010",
+        "pickup_order": 1
+      }
+    ],
+    "centroid": [
+      30.7168089,
+      76.7786791
+    ],
+    "utilization": 0.2,
+    "turning_score": 0,
+    "tortuosity_ratio": 1.0,
+    "direction_consistency": 1.0,
+    "first_name": "DESHRAJ",
+    "last_name": "VERMA",
+    "email": "",
+    "vehicle_name": "2022",
+    "vehicle_no": "PB01C7853",
+    "capacity": 5,
+    "chasis_no": "MA3CZFB3SMF806448",
+    "color": "WHITE",
+    "registration_no": "PB01C7853",
+    "shift_type_id": 2,
+    "cached_order": {
+      "driver_id": "335463",
+      "user_ids": [
+        "335321"
+      ],
+      "ordered_user_ids": [
+        "335321"
+      ],
+      "pickup_sequence": [
+        1
+      ],
+      "total_distance_km": 12.78,
+      "total_duration_min": 1533.2,
+      "calculated_date": "2025-10-24T15:24:08.020476",
+      "algorithm": "google_directions_api"
+    },
+    "route_distance_km": 12.78,
+    "route_duration_min": 1533.2,
+    "ordering_source": "cached"
+  },
+  {
+    "driver_id": "335481",
+    "vehicle_id": "64",
+    "vehicle_type": 5,
+    "latitude": 30.7046486,
+    "longitude": 76.7178726,
+    "assigned_users": [
+      {
+        "user_id": "335323",
+        "lat": 30.7242029,
+        "lng": 76.7264409,
+        "office_distance": 4.73,
+        "first_name": "Chaitanya",
+        "email": "chloe@unifylogisticsolutions.com",
+        "address": "House No. #536, Phase 2 Sector 54 Mohali - 160055",
+        "employee_shift": "Evening shift",
+        "shift_type": "1",
+        "last_name": "Mahajan",
+        "phone": "7876755991",
+        "pickup_order": 1
+      }
+    ],
+    "centroid": [
+      30.7242029,
+      76.7264409
+    ],
+    "utilization": 0.2,
+    "turning_score": 0,
+    "tortuosity_ratio": 1.0,
+    "direction_consistency": 1.0,
+    "first_name": "SATNAM",
+    "last_name": "SINGH",
+    "email": "satname@yopmail.com",
+    "vehicle_name": "2023",
+    "vehicle_no": "PB01D7146",
+    "capacity": 5,
+    "chasis_no": "MALB241CLPM202634",
+    "color": "WHITE",
+    "registration_no": "PB01D1510",
+    "shift_type_id": 2,
+    "cached_order": {
+      "driver_id": "335481",
+      "user_ids": [
+        "335323"
+      ],
+      "ordered_user_ids": [
+        "335323"
+      ],
+      "pickup_sequence": [
+        1
+      ],
+      "total_distance_km": 9.46,
+      "total_duration_min": 1135.6,
+      "calculated_date": "2025-10-24T15:24:08.021409",
+      "algorithm": "google_directions_api"
+    },
+    "route_distance_km": 9.46,
+    "route_duration_min": 1135.6,
+    "ordering_source": "cached"
+  },
+  {
+    "driver_id": "335506",
+    "vehicle_id": "89",
+    "vehicle_type": 7,
+    "latitude": 30.7455437,
+    "longitude": 76.7439376,
+    "assigned_users": [
+      {
+        "user_id": "335358",
+        "lat": 30.74,
+        "lng": 76.79,
+        "office_distance": 8.93,
+        "first_name": "Aryan",
+        "email": "steve.h@unifylogisticsolutions.com",
+        "address": "House No. #2505, Sector 22C, Opposite of JW Marriott, Chandigarh",
+        "employee_shift": "Evening shift",
+        "shift_type": "1",
+        "last_name": "Sekhri",
+        "phone": "99144-60999",
+        "pickup_order": 1
+      }
+    ],
+    "centroid": [
+      30.74,
+      76.79
+    ],
+    "utilization": 0.14285714285714285,
+    "turning_score": 0,
+    "tortuosity_ratio": 1.0,
+    "direction_consistency": 1.0,
+    "first_name": "Vardaan",
+    "last_name": "Singh",
+    "email": "vardna@yopmail.com",
+    "vehicle_name": "2023",
+    "vehicle_no": "PB01D4380",
+    "capacity": 7,
+    "chasis_no": "MA3BNC62SPA582220",
+    "color": "WHITE",
+    "registration_no": "PB01D1535",
+    "shift_type_id": 2,
+    "cached_order": {
+      "driver_id": "335506",
+      "user_ids": [
+        "335358"
+      ],
+      "ordered_user_ids": [
+        "335358"
+      ],
+      "pickup_sequence": [
+        1
+      ],
+      "total_distance_km": 17.86,
+      "total_duration_min": 2142.9,
+      "calculated_date": "2025-10-24T15:24:08.022739",
+      "algorithm": "google_directions_api"
+    },
+    "route_distance_km": 17.86,
+    "route_duration_min": 2142.9,
+    "ordering_source": "cached"
+  },
+  {
+    "driver_id": "335465",
+    "vehicle_id": "53",
+    "vehicle_type": 5,
+    "latitude": 30.7252649,
+    "longitude": 76.6509078,
+    "assigned_users": [
+      {
+        "user_id": "335387",
+        "lat": 30.6951,
+        "lng": 76.7355,
+        "office_distance": 1.76,
+        "first_name": "Shruti",
+        "email": "shruti@unifylogisticsolutions.com",
+        "address": "House no. 605, HIG, Phase 9, Landmark :- Burn Gym Sector 63 Mohali -160062",
+        "employee_shift": "Evening shift",
+        "shift_type": "1",
+        "last_name": "",
+        "phone": "7015527552",
+        "pickup_order": 1
+      }
+    ],
+    "centroid": [
+      30.6951,
+      76.7355
+    ],
+    "utilization": 0.2,
+    "turning_score": 0,
+    "tortuosity_ratio": 1.0,
+    "direction_consistency": 1.0,
+    "first_name": "RAKESH",
+    "last_name": "THAKUR",
+    "email": "",
+    "vehicle_name": "2022",
+    "vehicle_no": "PB01D1499",
+    "capacity": 5,
+    "chasis_no": "MA3JMTB1SNC655032",
+    "color": "WHITE",
+    "registration_no": "PB01D1499",
+    "shift_type_id": 2,
+    "cached_order": {
+      "driver_id": "335465",
+      "user_ids": [
+        "335387"
+      ],
+      "ordered_user_ids": [
+        "335387"
+      ],
+      "pickup_sequence": [
+        1
+      ],
+      "total_distance_km": 3.52,
+      "total_duration_min": 421.9,
+      "calculated_date": "2025-10-24T15:24:08.024020",
+      "algorithm": "google_directions_api"
+    },
+    "route_distance_km": 3.52,
+    "route_duration_min": 421.9,
+    "ordering_source": "cached"
+  },
+  {
+    "driver_id": "335512",
+    "vehicle_id": "95",
+    "vehicle_type": 5,
+    "latitude": 30.6425496,
+    "longitude": 76.8173359,
+    "assigned_users": [
+      {
+        "user_id": "335389",
+        "lat": 30.6364519,
+        "lng": 76.8155894,
+        "office_distance": 9.95,
+        "first_name": "Jaspal",
+        "email": "jas@unifylogisticsolutions.com",
+        "address": "Flat No. #302, GS Tower 1, VIP Road, Near Dominos, Zirakpur",
+        "employee_shift": "Evening shift",
+        "shift_type": "1",
+        "last_name": "Singh Takkar",
+        "phone": "6284882929",
+        "pickup_order": 1
+      }
+    ],
+    "centroid": [
+      30.6364519,
+      76.8155894
+    ],
+    "utilization": 0.2,
+    "turning_score": 0,
+    "tortuosity_ratio": 1.0,
+    "direction_consistency": 1.0,
+    "first_name": "umesh",
+    "last_name": "sharma",
+    "email": "umeshk@yopmail.com",
+    "vehicle_name": "2022",
+    "vehicle_no": "PB01D1954",
+    "capacity": 5,
+    "chasis_no": "MBHCZFB3SNJ320454",
+    "color": "WHITE",
+    "registration_no": "PB01D1554",
+    "shift_type_id": 2,
+    "cached_order": {
+      "driver_id": "335512",
+      "user_ids": [
+        "335389"
+      ],
+      "ordered_user_ids": [
+        "335389"
+      ],
+      "pickup_sequence": [
+        1
+      ],
+      "total_distance_km": 19.9,
+      "total_duration_min": 2387.6,
+      "calculated_date": "2025-10-24T15:24:08.025091",
+      "algorithm": "google_directions_api"
+    },
+    "route_distance_km": 19.9,
+    "route_duration_min": 2387.6,
+    "ordering_source": "cached"
+  },
+  {
+    "driver_id": "335505",
+    "vehicle_id": "88",
+    "vehicle_type": 5,
+    "latitude": 30.7046486,
+    "longitude": 76.7178726,
+    "assigned_users": [
+      {
+        "user_id": "335396",
+        "lat": 30.7254358,
+        "lng": 76.6956133,
+        "office_distance": 5.66,
+        "first_name": "Vikas",
+        "email": "viky@unifylogisticsolutions.com",
+        "address": "House No. #2252, Shiv Mandir, Azad Nagar, Balongi",
+        "employee_shift": "Evening shift",
+        "shift_type": "1",
+        "last_name": "Kumar Thakur",
+        "phone": "9501454507",
+        "pickup_order": 1
+      }
+    ],
+    "centroid": [
+      30.7254358,
+      76.6956133
+    ],
+    "utilization": 0.2,
+    "turning_score": 0,
+    "tortuosity_ratio": 1.0,
+    "direction_consistency": 1.0,
+    "first_name": "Rahul",
+    "last_name": "Katyal",
+    "email": "rahul@yopmail.com",
+    "vehicle_name": "2019",
+    "vehicle_no": "PB01C4183",
+    "capacity": 5,
+    "chasis_no": "MA3EUA61S00E84604",
+    "color": "WHITE",
+    "registration_no": "PB01D1534",
+    "shift_type_id": 2,
+    "cached_order": {
+      "driver_id": "335505",
+      "user_ids": [
+        "335396"
+      ],
+      "ordered_user_ids": [
+        "335396"
+      ],
+      "pickup_sequence": [
+        1
+      ],
+      "total_distance_km": 11.32,
+      "total_duration_min": 1358.7,
+      "calculated_date": "2025-10-24T15:24:08.026184",
+      "algorithm": "google_directions_api"
+    },
+    "route_distance_km": 11.32,
+    "route_duration_min": 1358.7,
+    "ordering_source": "cached"
+  },
+  {
+    "driver_id": "335480",
+    "vehicle_id": "63",
+    "vehicle_type": 7,
+    "latitude": 30.7046486,
+    "longitude": 76.7178726,
+    "assigned_users": [
+      {
+        "user_id": "335797",
+        "lat": 30.738067,
+        "lng": 76.764844,
+        "office_distance": 7.3,
+        "first_name": "somya",
+        "email": "s.kandwalsomya.23@gmail.com",
+        "address": "house no.- #2386 , landmark- near gurudwara, Sector- 23C,\u00a0Chandigarh",
+        "employee_shift": "Evening shift",
+        "shift_type": "1",
+        "last_name": "kandwal",
+        "phone": "(798) 616-1507",
+        "pickup_order": 1
+      }
+    ],
+    "centroid": [
+      30.738067,
+      76.764844
+    ],
+    "utilization": 0.14285714285714285,
+    "turning_score": 0,
+    "tortuosity_ratio": 1.0,
+    "direction_consistency": 1.0,
+    "first_name": "Jobanpreet",
+    "last_name": "Singh",
+    "email": "john@yopmail.com",
+    "vehicle_name": "2020",
+    "vehicle_no": "PB01C5681",
+    "capacity": 7,
+    "chasis_no": "MA3BN22SLA217768",
+    "color": "WHITE",
+    "registration_no": "PB01D1509",
+    "shift_type_id": 2,
+    "cached_order": {
+      "driver_id": "335480",
+      "user_ids": [
+        "335797"
+      ],
+      "ordered_user_ids": [
+        "335797"
+      ],
+      "pickup_sequence": [
+        1
+      ],
+      "total_distance_km": 14.6,
+      "total_duration_min": 1751.5,
+      "calculated_date": "2025-10-24T15:24:08.027300",
+      "algorithm": "google_directions_api"
+    },
+    "route_distance_km": 14.6,
+    "route_duration_min": 1751.5,
+    "ordering_source": "cached"
+  },
+  {
+    "driver_id": "335488",
+    "vehicle_id": "71",
+    "vehicle_type": 5,
+    "latitude": 30.720226,
+    "longitude": 76.8374945,
+    "assigned_users": [
+      {
+        "user_id": "335809",
+        "lat": 30.7806152,
+        "lng": 76.8069689,
+        "office_distance": 13.46,
+        "first_name": "Vikas",
+        "email": "vikas.k29b@gmail.com",
+        "address": "House No:- 771 A, Locality:- SHIVALIK VIHAR, NAYA GOAN, Landmark:- RA FARM GATE NUMBER 2, City :-\u00a0Mohali\u00a0,\u00a0160103",
+        "employee_shift": "Evening shift",
+        "shift_type": "1",
+        "last_name": "sirohi",
+        "phone": "(628) 058-1146",
+        "pickup_order": 1
+      }
+    ],
+    "centroid": [
+      30.7806152,
+      76.8069689
+    ],
+    "utilization": 0.2,
+    "turning_score": 0,
+    "tortuosity_ratio": 1.0,
+    "direction_consistency": 1.0,
+    "first_name": "JASWINDER",
+    "last_name": "SINGH",
+    "email": "jaswinder@yopmail.com",
+    "vehicle_name": "2024",
+    "vehicle_no": "T0324PB3200B",
+    "capacity": 5,
+    "chasis_no": "MA3JMTB1SBA66842",
+    "color": "WHITE",
+    "registration_no": "PB01D1517",
+    "shift_type_id": 2,
+    "cached_order": {
+      "driver_id": "335488",
+      "user_ids": [
+        "335809"
+      ],
+      "ordered_user_ids": [
+        "335809"
+      ],
+      "pickup_sequence": [
+        1
+      ],
+      "total_distance_km": 26.92,
+      "total_duration_min": 3230.9,
+      "calculated_date": "2025-10-24T15:24:08.028453",
+      "algorithm": "google_directions_api"
+    },
+    "route_distance_km": 26.92,
+    "route_duration_min": 3230.9,
+    "ordering_source": "cached"
+  }
+]
