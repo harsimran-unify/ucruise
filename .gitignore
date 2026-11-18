@@ -1,11 +1,9 @@
-localTesting/
+.env
 
 logs/
-
-.env
+nohup.out
+*.log
 
 __pycache__/
 
-nohup.out
-
-*.log
+localTesting/
