@@ -3,6 +3,7 @@
 logs/
 nohup.out
 *.log
+drivers_and_routes_all.json
 
 __pycache__/
 

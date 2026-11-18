@@ -23,9 +23,9 @@ uv run python run_and_view.py [--source-id X --parameter 1 --string-param "Eveni
 uv run python test_analysis.py    # direct in-process test, no HTTP layer
 ```
 
-There is no test suite or linter. Verification is manual: inspect the API response, `logs/assignment_*.log`, and the dashboard at `http://localhost:5000/visualize` (served from `localTesting/visualize.html`).
+There is no test suite or linter (an httpx dev-dependency enables FastAPI's TestClient for ad-hoc checks). Verification is manual: inspect the API response, `logs/assignment_*.log`, and the dashboard at `http://localhost:5000/visualize` (served from `localTesting/visualize.html` — its ALGORITHM sidebar loads `/routes-all`, switches per-mode results in memory, and triggers `/assign-drivers-all` on the local_server wrapper). Note: `localTesting/` is gitignored — dashboard fixes don't reach the server copy automatically.
 
-Key endpoints: `POST /assign-drivers/{source_id}/{parameter}/{string_param}/{choice}` (main assignment), `GET /routes` (last saved result), `POST /pickup_order` and `POST /pickup_orderV2` (Google-based pickup reordering), `GET /health`.
+Key endpoints: `POST /assign-drivers/{source_id}/{parameter}/{string_param}/{choice}` (main assignment, single algorithm chosen by ride_settings), `GET /routes` (last result), `POST /pickup_order` and `POST /pickup_orderV2` (Google-based pickup reordering), `GET /health`. Locally only: `localTesting/local_server.py` wraps `main:app` with `/assign-drivers-all` (runs all five algorithms on the same parameters, returns `{all_modes, modes}`) and `/routes-all` — run via `localTesting/run_and_view.py`; never deployed.
 
 ## Configuration
 

@@ -1102,6 +1102,7 @@ def assign_best_driver_to_cluster(cluster_users, available_drivers,
             'driver_id': str(best_driver['driver_id']),
             'vehicle_id': str(best_driver.get('vehicle_id', '')),
             'vehicle_type': int(best_driver['capacity']),
+            'capacity': int(best_driver['capacity']),
             'latitude': float(best_driver['latitude']),
             'longitude': float(best_driver['longitude']),
             'assigned_users': []
@@ -1126,7 +1127,9 @@ def assign_best_driver_to_cluster(cluster_users, available_drivers,
             user_data = {
                 'user_id': str(user['user_id']),
                 'lat': float(user['latitude']),
+                'latitude': float(user['latitude']),
                 'lng': float(user['longitude']),
+                'longitude': float(user['longitude']),
                 'office_distance': float(user.get('office_distance', 0))
             }
 
@@ -1521,6 +1524,7 @@ def create_sub_route_improved(original_route, users, available_drivers,
             'driver_id': str(best_driver['driver_id']),
             'vehicle_id': str(best_driver.get('vehicle_id', '')),
             'vehicle_type': int(best_driver['capacity']),
+            'capacity': int(best_driver['capacity']),
             'latitude': float(best_driver['latitude']),
             'longitude': float(best_driver['longitude']),
             'assigned_users': users
@@ -2037,6 +2041,7 @@ def final_pass_merge(routes, config, office_lat, office_lon):
             test_route[
                 'assigned_users'] = r1['assigned_users'] + r2['assigned_users']
             test_route['vehicle_type'] = max_capacity
+            test_route['capacity'] = max_capacity
 
             # Optimize sequence for merged route
             test_route = optimize_route_sequence_improved(
@@ -2249,6 +2254,7 @@ def fix_single_user_routes_improved(routes, user_df, assigned_user_ids,
                 'assigned_users']
             merged_route['vehicle_type'] = max(route1['vehicle_type'],
                                                route2['vehicle_type'])
+            merged_route['capacity'] = merged_route['vehicle_type']
 
             merged_route = optimize_route_sequence_improved(
                 merged_route, office_lat, office_lon)
@@ -2358,7 +2364,9 @@ def quality_controlled_route_filling(routes, unassigned_users_df,
                 {
                     'user_id': str(user['user_id']),
                     'lat': float(user['latitude']),
+                    'latitude': float(user['latitude']),
                     'lng': float(user['longitude']),
+                    'longitude': float(user['longitude']),
                     'office_distance': float(user.get('office_distance', 0))
                 }
             ]
@@ -2382,10 +2390,10 @@ def quality_controlled_route_filling(routes, unassigned_users_df,
                 route['assigned_users'].append({
                     'user_id':
                     str(user['user_id']),
-                    'lat':
-                    float(user['latitude']),
-                    'lng':
-                    float(user['longitude']),
+                    'lat': float(user['latitude']),
+                    'latitude': float(user['latitude']),
+                    'lng': float(user['longitude']),
+                    'longitude': float(user['longitude']),
                     'office_distance':
                     float(user.get('office_distance', 0))
                 })
@@ -2536,6 +2544,7 @@ def calculate_merge_quality_score(route1, route2, office_lat, office_lon):
     test_route['assigned_users'] = all_users
     test_route['vehicle_type'] = max(route1['vehicle_type'],
                                      route2['vehicle_type'])
+    test_route['capacity'] = test_route['vehicle_type']
 
     # Calculate quality metrics
     turning_score = calculate_route_turning_score_improved(
@@ -2576,6 +2585,7 @@ def perform_quality_merge_improved(route1, route2, office_lat, office_lon):
     merged_route['assigned_users'] = all_users
     merged_route['vehicle_type'] = max(route1['vehicle_type'],
                                        route2['vehicle_type'])
+    merged_route['capacity'] = merged_route['vehicle_type']
 
     # Optimize and update metrics
     merged_route = optimize_route_sequence_improved(merged_route, office_lat,
@@ -2753,6 +2763,7 @@ def create_split_routes_improved(original_route, user_groups,
                     'driver_id': str(suitable_driver['driver_id']),
                     'vehicle_id': str(suitable_driver.get('vehicle_id', '')),
                     'vehicle_type': int(suitable_driver['capacity']),
+                    'capacity': int(suitable_driver['capacity']),
                     'latitude': float(suitable_driver['latitude']),
                     'longitude': float(suitable_driver['longitude']),
                     'assigned_users': group
@@ -2961,7 +2972,9 @@ def handle_remaining_users_improved(unassigned_users_df, driver_df, routes,
                 test_user_data = {
                     'user_id': str(user['user_id']),
                     'lat': float(user['latitude']),
+                    'latitude': float(user['latitude']),
                     'lng': float(user['longitude']),
+                    'longitude': float(user['longitude']),
                     'office_distance': float(user.get('office_distance', 0))
                 }
 
@@ -2997,7 +3010,9 @@ def handle_remaining_users_improved(unassigned_users_df, driver_df, routes,
                 user_data = {
                     'user_id': str(user['user_id']),
                     'lat': float(user['latitude']),
+                    'latitude': float(user['latitude']),
                     'lng': float(user['longitude']),
+                    'longitude': float(user['longitude']),
                     'office_distance': float(user.get('office_distance', 0))
                 }
 
@@ -3092,10 +3107,10 @@ def handle_remaining_users_improved(unassigned_users_df, driver_df, routes,
                             user_data = {
                                 'user_id':
                                 str(user['user_id']),
-                                'lat':
-                                float(user['latitude']),
-                                'lng':
-                                float(user['longitude']),
+                                'lat': float(user['latitude']),
+                                'latitude': float(user['latitude']),
+                                'lng': float(user['longitude']),
+                                'longitude': float(user['longitude']),
                                 'office_distance':
                                 float(user.get('office_distance', 0))
                             }
@@ -3116,6 +3131,8 @@ def handle_remaining_users_improved(unassigned_users_df, driver_df, routes,
                             'vehicle_id':
                             str(best_driver.get('vehicle_id', '')),
                             'vehicle_type':
+                            int(best_driver['capacity']),
+                            'capacity':
                             int(best_driver['capacity']),
                             'latitude':
                             float(best_driver['latitude']),
@@ -3154,7 +3171,9 @@ def handle_remaining_users_improved(unassigned_users_df, driver_df, routes,
                     user_data = {
                         'user_id': str(user['user_id']),
                         'lat': float(user['latitude']),
+                        'latitude': float(user['latitude']),
                         'lng': float(user['longitude']),
+                        'longitude': float(user['longitude']),
                         'office_distance':
                         float(user.get('office_distance', 0))
                     }
@@ -3168,6 +3187,7 @@ def handle_remaining_users_improved(unassigned_users_df, driver_df, routes,
                         'driver_id': str(best_driver['driver_id']),
                         'vehicle_id': str(best_driver.get('vehicle_id', '')),
                         'vehicle_type': int(best_driver['capacity']),
+                        'capacity': int(best_driver['capacity']),
                         'latitude': float(best_driver['latitude']),
                         'longitude': float(best_driver['longitude']),
                         'assigned_users': [user_data]
@@ -3196,6 +3216,8 @@ def handle_remaining_users_improved(unassigned_users_df, driver_df, routes,
             'user_id': str(user['user_id']),
             'lat': float(user['latitude']),
             'lng': float(user['longitude']),
+            'latitude': float(user['latitude']),
+            'longitude': float(user['longitude']),
             'office_distance': float(user.get('office_distance', 0))
         }
 
@@ -3664,10 +3686,10 @@ def run_route_efficiency_assignment(source_id: str, parameter: int = 1, string_p
                                 user_data = {
                                     'user_id':
                                     str(user['id']),
-                                    'lat':
-                                    float(user['latitude']),
-                                    'lng':
-                                    float(user['longitude']),
+                                    'lat': float(user['latitude']),
+                                    'latitude': float(user['latitude']),
+                                    'lng': float(user['longitude']),
+                                    'longitude': float(user['longitude']),
                                     'office_distance':
                                     float(user.get('office_distance', 0))
                                 }
@@ -3706,10 +3728,10 @@ def run_route_efficiency_assignment(source_id: str, parameter: int = 1, string_p
                                 user_data = {
                                     'user_id':
                                     str(user['id']),
-                                    'lat':
-                                    float(user['latitude']),
-                                    'lng':
-                                    float(user['longitude']),
+                                    'lat': float(user['latitude']),
+                                    'latitude': float(user['latitude']),
+                                    'lng': float(user['longitude']),
+                                    'longitude': float(user['longitude']),
                                     'office_distance':
                                     float(user.get('office_distance', 0))
                                 }
@@ -3725,6 +3747,8 @@ def run_route_efficiency_assignment(source_id: str, parameter: int = 1, string_p
                                     'vehicle_id':
                                     str(best_driver.get('vehicle_id', '')),
                                     'vehicle_type':
+                                    int(best_driver['capacity']),
+                                    'capacity':
                                     int(best_driver['capacity']),
                                     'latitude':
                                     float(best_driver['latitude']),
@@ -3747,10 +3771,10 @@ def run_route_efficiency_assignment(source_id: str, parameter: int = 1, string_p
                             missing_user_data = {
                                 'user_id':
                                 str(user['id']),
-                                'lat':
-                                float(user['latitude']),
-                                'lng':
-                                float(user['longitude']),
+                                'lat': float(user['latitude']),
+                                'latitude': float(user['latitude']),
+                                'lng': float(user['longitude']),
+                                'longitude': float(user['longitude']),
                                 'office_distance':
                                 float(user.get('office_distance', 0))
                             }

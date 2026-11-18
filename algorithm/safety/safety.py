@@ -1222,7 +1222,9 @@ def perform_route_merge(route1, route2, office_lat, office_lon):
             user_list.append({
                 'user_id': user['user_id'],
                 'latitude': user['lat'],
+                'lat': user['lat'],
                 'longitude': user['lng'],
+                'lng': user['lng'],
                 'office_distance': user.get('office_distance', 0)
             })
 
@@ -1235,7 +1237,9 @@ def perform_route_merge(route1, route2, office_lat, office_lon):
             user_data = {
                 'user_id': str(user['user_id']),
                 'lat': float(user['latitude']),
+                'latitude': float(user['latitude']),
                 'lng': float(user['longitude']),
+                'longitude': float(user['longitude']),
                 'office_distance': float(user.get('office_distance', 0))
             }
 
@@ -1557,7 +1561,9 @@ def fill_remaining_seats(routes, unassigned_users_df, office_lat, office_lon):
             user_data = {
                 'user_id': str(user['user_id']),
                 'lat': float(user['latitude']),
+                'latitude': float(user['latitude']),
                 'lng': float(user['longitude']),
+                'longitude': float(user['longitude']),
                 'office_distance': float(user.get('office_distance', 0))
             }
 
@@ -2464,6 +2470,7 @@ def run_safety_assignment_simplified(source_id: str, parameter: int = 1, string_
                     'driver_id': str(assigned_driver['driver_id']),
                     'vehicle_id': str(assigned_driver.get('vehicle_id', '')),
                     'vehicle_type': int(assigned_driver['capacity']),
+                    'capacity': int(assigned_driver['capacity']),
                     'latitude': float(assigned_driver['latitude']),
                     'longitude': float(assigned_driver['longitude']),
                     'assigned_users': []
@@ -2474,7 +2481,9 @@ def run_safety_assignment_simplified(source_id: str, parameter: int = 1, string_
                     user_data = {
                         'user_id': str(user['user_id']),
                         'lat': float(user['latitude']),
+                        'latitude': float(user['latitude']),
                         'lng': float(user['longitude']),
+                        'longitude': float(user['longitude']),
                         'office_distance': float(user.get('office_distance', 0))
                     }
 
@@ -2517,7 +2526,9 @@ def run_safety_assignment_simplified(source_id: str, parameter: int = 1, string_
             user_data = {
                 'user_id': str(user['user_id']),
                 'lat': float(user['latitude']),
+                'latitude': float(user['latitude']),
                 'lng': float(user['longitude']),
+                'longitude': float(user['longitude']),
                 'first_name': str(user.get('first_name', '')),
                 'email': str(user.get('email', ''))
             }

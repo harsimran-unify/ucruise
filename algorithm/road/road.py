@@ -687,6 +687,8 @@ def assign_drivers_by_priority_route_optimized(user_df, driver_df, office_lat,
                 'user_id': str(user['user_id']),
                 'latitude': float(user_lat),
                 'longitude': float(user_lng),
+                'lat': float(user_lat),
+                'lng': float(user_lng),
                 'office_distance': float(user.get('office_distance', 0))
             }
             if pd.notna(user.get('first_name')):
@@ -800,6 +802,7 @@ def assign_best_driver_to_cluster_route_optimized(cluster_users,
             'driver_id': str(best_driver['driver_id']),
             'vehicle_id': str(best_driver.get('vehicle_id', '')),
             'capacity': int(best_driver['capacity']),
+            'vehicle_type': int(best_driver['capacity']),
             'latitude': float(best_driver['latitude']),
             'longitude': float(best_driver['longitude']),
             'assigned_users': []
@@ -811,6 +814,8 @@ def assign_best_driver_to_cluster_route_optimized(cluster_users,
                 'user_id': str(user['user_id']),
                 'latitude': float(user['latitude']),
                 'longitude': float(user['longitude']),
+                'lat': float(user['latitude']),
+                'lng': float(user['longitude']),
                 'office_distance': float(user.get('office_distance', 0))
             }
 
@@ -936,6 +941,7 @@ def assign_leftover_users_to_drivers(unassigned_users, available_drivers, office
                 'driver_id': str(driver['driver_id']),
                 'vehicle_id': str(driver.get('vehicle_id', '')),
                 'capacity': vehicle_capacity,
+                'vehicle_type': vehicle_capacity,
                 'latitude': float(driver['latitude']),
                 'longitude': float(driver['longitude']),
                 'assigned_users': []
@@ -947,6 +953,8 @@ def assign_leftover_users_to_drivers(unassigned_users, available_drivers, office
                     'user_id': str(user['user_id']),
                     'latitude': float(user['latitude']),
                     'longitude': float(user['longitude']),
+                    'lat': float(user['latitude']),
+                    'lng': float(user['longitude']),
                     'office_distance': float(user.get('office_distance', 0))
                 }
                 if 'first_name' in user and pd.notna(user['first_name']):
@@ -1408,6 +1416,7 @@ def enhanced_route_splitting(routes, driver_df, office_lat, office_lon):
                             'vehicle_id': str(new_driver.get('vehicle_id',
                                                              '')),
                             'capacity': int(new_driver['capacity']),
+                            'vehicle_type': int(new_driver['capacity']),
                             'latitude': float(new_driver['latitude']),
                             'longitude': float(new_driver['longitude']),
                             'assigned_users': group
@@ -1444,6 +1453,7 @@ def enhanced_route_splitting(routes, driver_df, office_lat, office_lon):
                         'driver_id': str(new_driver['driver_id']),
                         'vehicle_id': str(new_driver.get('vehicle_id', '')),
                         'capacity': int(new_driver['capacity']),
+                        'vehicle_type': int(new_driver['capacity']),
                         'latitude': float(new_driver['latitude']),
                         'longitude': float(new_driver['longitude']),
                         'assigned_users': group2
@@ -2475,6 +2485,8 @@ def perform_quality_merge_improved(routes, config, office_lat, office_lon):
                 route1['vehicle_id'],
                 'capacity':
                 max_capacity,
+                'vehicle_type':
+                max_capacity,
                 'latitude': (center1[0] * len(route1['assigned_users']) +
                              center2[0] * len(route2['assigned_users'])) /
                 total_users if total_users > 0 else center1[0],
@@ -3491,6 +3503,7 @@ def create_corridor_route(user_group, driver, office_lat, office_lon):
         'driver_id': str(driver['driver_id']),
         'vehicle_id': str(driver.get('vehicle_id', '')),
         'capacity': int(driver['capacity']),
+        'vehicle_type': int(driver['capacity']),
         'latitude': float(driver['latitude']),
         'longitude': float(driver['longitude']),
         'assigned_users': []
@@ -3504,6 +3517,8 @@ def create_corridor_route(user_group, driver, office_lat, office_lon):
             'user_id': str(user['user_id']),
             'latitude': float(user['latitude']),
             'longitude': float(user['longitude']),
+            'lat': float(user['latitude']),
+            'lng': float(user['longitude']),
             'office_distance': float(user.get('office_distance', 0))
         }
         if 'first_name' in user and pd.notna(user['first_name']):
