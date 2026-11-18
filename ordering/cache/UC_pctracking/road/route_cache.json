@@ -1,0 +1,42 @@
+{
+  "route_cache": {
+    "b3594d07143566b720aab12c2bd78bdd": {
+      "driver_id": "345069",
+      "user_ids": [
+        "341220"
+      ],
+      "ordered_user_ids": [
+        "341220"
+      ],
+      "pickup_sequence": [
+        1
+      ],
+      "total_distance_km": 16682.88,
+      "total_duration_min": 2001946.2,
+      "calculated_date": "2025-11-21T09:21:11.626744",
+      "algorithm": "google_directions_api"
+    },
+    "ec637ccc877410d295e275e0f31b64bc": {
+      "driver_id": "345079",
+      "user_ids": [
+        "341220"
+      ],
+      "ordered_user_ids": [
+        "341220"
+      ],
+      "pickup_sequence": [
+        1
+      ],
+      "total_distance_km": 16682.88,
+      "total_duration_min": 2001946.2,
+      "calculated_date": "2025-11-21T09:55:21.530986",
+      "algorithm": "google_directions_api"
+    }
+  },
+  "metadata": {
+    "last_cache_update": "2025-11-21T09:55:21.530993",
+    "total_cached_routes": 2,
+    "company_db": "UC_pctracking",
+    "algorithm": "road"
+  }
+}

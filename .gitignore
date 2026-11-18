@@ -1,0 +1,11 @@
+localTesting/
+
+logs/
+
+.env
+
+__pycache__/
+
+nohup.out
+
+*.log
