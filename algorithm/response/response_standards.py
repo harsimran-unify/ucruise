@@ -132,25 +132,46 @@ def standardize_coordinates(obj):
     # Create a copy to avoid modifying the original
     standardized = obj.copy()
 
-    # Convert lat -> latitude
+    # Convert lat -> latitude (null-safe: float(None) would raise TypeError)
     if 'lat' in standardized and LATITUDE not in standardized:
-        standardized[LATITUDE] = float(standardized.pop('lat'))
+        value = standardized.pop('lat')
+        if value is not None:
+            try:
+                standardized[LATITUDE] = float(value)
+            except (TypeError, ValueError):
+                standardized[LATITUDE] = value
+        else:
+            standardized[LATITUDE] = None
     elif 'lat' in standardized and LATITUDE in standardized:
         # Remove lat if both exist
         standardized.pop('lat')
 
     # Convert lng -> longitude
     if 'lng' in standardized and LONGITUDE not in standardized:
-        standardized[LONGITUDE] = float(standardized.pop('lng'))
+        value = standardized.pop('lng')
+        if value is not None:
+            try:
+                standardized[LONGITUDE] = float(value)
+            except (TypeError, ValueError):
+                standardized[LONGITUDE] = value
+        else:
+            standardized[LONGITUDE] = None
     elif 'lng' in standardized and LONGITUDE in standardized:
         # Remove lng if both exist
         standardized.pop('lng')
 
-    # Ensure latitude and longitude are floats if they exist
-    if LATITUDE in standardized:
-        standardized[LATITUDE] = float(standardized[LATITUDE])
-    if LONGITUDE in standardized:
-        standardized[LONGITUDE] = float(standardized[LONGITUDE])
+    # Ensure latitude and longitude are floats if they exist (null-safe:
+    # float(None) would raise TypeError and abort the response build)
+    if LATITUDE in standardized and standardized[LATITUDE] is not None:
+        try:
+            standardized[LATITUDE] = float(standardized[LATITUDE])
+        except (TypeError, ValueError):
+            pass
+    if LONGITUDE in standardized and standardized[LONGITUDE] is not None:
+        try:
+            standardized[LONGITUDE] = float(standardized[LONGITUDE])
+        except (TypeError, ValueError):
+            pass
 
     return standardized
 

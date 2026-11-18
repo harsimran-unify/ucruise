@@ -7,6 +7,13 @@ from typing import List, Optional, Dict, Any
 import os
 import json
 import traceback
+import sys
+
+# Force UTF-8 stdio: this codebase prints emoji, which crashes with
+# UnicodeEncodeError on Windows when stdout is a pipe (cp1252 fallback)
+if sys.stdout and hasattr(sys.stdout, 'reconfigure'):
+    sys.stdout.reconfigure(encoding='utf-8', errors='replace')
+    sys.stderr.reconfigure(encoding='utf-8', errors='replace')
 
 app = FastAPI()
 
@@ -530,11 +537,18 @@ def assign_drivers(source_id: str, parameter: int, string_param: str,
         if not choice or choice.strip() == "":
             choice = " "  # Use space instead of empty string
             
-        # First, get the data to determine which algorithm to use
+        # First, get the data to determine which algorithm to use.
+        # Only data-fetch failures fall back to the default algorithm run;
+        # errors inside a chosen algorithm propagate to the outer handler
+        # so real bugs surface instead of being masked by a silent rerun.
         try:
             data = load_env_and_fetch_data(source_id, parameter, string_param,
                                            choice)
+        except Exception as api_error:
+            print(f"⚠️ API error, using default algorithm: {api_error}")
+            data = None
 
+        if data is not None:
             # Check safety flag first - this overrides all other algorithm selection
             safety_flag = data.get("safety", 0)
 
@@ -591,8 +605,7 @@ def assign_drivers(source_id: str, parameter: int, string_param: str,
                                             choice)
                     result["optimization_mode"] = "route_efficiency_default"
 
-        except Exception as api_error:
-            print(f"⚠️ API error, using default algorithm: {api_error}")
+        else:
             from algorithm.base.base import run_assignment
             result = run_assignment(source_id, parameter, string_param, choice)
             result["optimization_mode"] = "route_efficiency_default"

@@ -16,6 +16,39 @@ logger = get_logger()
 load_dotenv()
 
 
+def read_user_coordinates(user: Dict[str, Any]) -> Tuple[Optional[float], Optional[float]]:
+    """
+    Read a user's coordinates regardless of key naming convention.
+
+    Routes arriving from the /pickup_order APIs carry 'latitude'/'longitude',
+    while route dicts produced by the algorithm pipelines carry 'lat'/'lng'.
+
+    Returns:
+        (latitude, longitude) as floats, or None entries when unusable
+    """
+    lat = None
+    lng = None
+    for key in ("lat", "latitude"):
+        value = user.get(key)
+        if value is not None:
+            lat = value
+            break
+    for key in ("lng", "longitude"):
+        value = user.get(key)
+        if value is not None:
+            lng = value
+            break
+    try:
+        lat = float(lat) if lat is not None else None
+    except (TypeError, ValueError):
+        lat = None
+    try:
+        lng = float(lng) if lng is not None else None
+    except (TypeError, ValueError):
+        lng = None
+    return lat, lng
+
+
 class GoogleRouteOptimizer:
     """Google Maps API integration for optimal pickup sequencing"""
 
@@ -115,26 +148,30 @@ class GoogleRouteOptimizer:
 
             # Parse response
             route = data["routes"][0]
-            leg = route["legs"][0]  # Since we optimize waypoints, we get one optimized leg
-
-            total_distance_m = leg["distance"]["value"]
-            total_duration_s = leg["duration"]["value"]
+            # With optimized waypoints Google returns one leg per waypoint plus
+            # the final leg back to the destination (office) — sum ALL legs,
+            # otherwise totals only cover the first pickup segment.
+            legs = route["legs"]
+            total_distance_m = sum(leg["distance"]["value"] for leg in legs)
+            total_duration_s = sum(leg["duration"]["value"] for leg in legs)
             total_distance_km = total_distance_m / 1000.0
             total_duration_min = total_duration_s / 60.0
 
             # Extract waypoint order from API response
             waypoint_order = route["waypoint_order"]
 
-            # Build route details
+            # Build route details across all legs
             route_details = []
-            steps = leg["steps"]
-            for i, step in enumerate(steps):
-                route_details.append({
-                    "step": i,
-                    "instruction": step["html_instructions"],
-                    "distance_m": step["distance"]["value"],
-                    "duration_s": step["duration"]["value"]
-                })
+            step_index = 0
+            for leg in legs:
+                for step in leg["steps"]:
+                    route_details.append({
+                        "step": step_index,
+                        "instruction": step["html_instructions"],
+                        "distance_m": step["distance"]["value"],
+                        "duration_s": step["duration"]["value"]
+                    })
+                    step_index += 1
 
             logger.info(f"Google API optimized route: {total_distance_km:.2f}km, {total_duration_min:.1f}min "
                        f"(order: {waypoint_order})")
@@ -227,7 +264,15 @@ def optimize_route_with_google(route: Dict[str, Any], office_lat: float, office_
 
         # Prepare positions for API - Route starts and ends at OFFICE
         office_pos = (office_lat, office_lon)
-        user_positions = [(user.get("lat"), user.get("lng")) for user in assigned_users]
+        user_positions = []
+        for user in assigned_users:
+            lat, lng = read_user_coordinates(user)
+            if lat is None or lng is None:
+                logger.warning(
+                    f"Route {driver_id}: user {user.get('user_id', '?')} has no usable coordinates"
+                )
+                return None
+            user_positions.append((lat, lng))
         # Driver position not needed for route calculation, but keep for compatibility
         driver_pos = (driver_lat, driver_lng)
 

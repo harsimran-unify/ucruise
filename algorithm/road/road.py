@@ -18,6 +18,10 @@ from logger import get_logger
 from progress import ProgressTracker
 from ordering.order_integration import OrderIntegration
 
+# Setup logging first — the cache-import block below logs at import time,
+# so the logger must exist before that block runs
+logger = get_logger()
+
 # Import algorithm-level caching system
 try:
     from algorithm.algorithm_cache import get_algorithm_cache, is_cache_disabled
@@ -37,8 +41,6 @@ from algorithm.pricebook.pricebook_calculator import calculate_pricebook_id
 
 warnings.filterwarnings('ignore')
 
-# Setup logging first
-logger = get_logger()
 progress = ProgressTracker()
 
 # ============================================================================
@@ -86,120 +88,88 @@ def cached_bearing_difference(b1, b2):
         diff = 360 - diff
     return diff
 
-# Import road_network module for route coherence scoring
+# Road network access via RoadNetworkManager (roadNetwork/router.py).
+# The manager starts loading the GraphML in a background thread with retries
+# as soon as it is first imported and falls back to its own mock if loading
+# fails. We hold a lazy proxy instead of a live instance so that importing
+# this module never blocks on the multi-second GraphML load — the shared
+# network is resolved on first use via get_road_network(force_wait=True).
+class MockRoadNetwork:
+
+    def get_route_coherence_score(self, driver_pos, user_positions,
+                                  office_pos):
+        # Mock implementation: returns a score based on simple distance heuristic
+        if not user_positions:
+            return 1.0
+        avg_dist_from_driver = sum(
+            cached_haversine(driver_pos[0], driver_pos[1], u[0],
+                               u[1])
+            for u in user_positions) / len(user_positions)
+        avg_dist_from_office = sum(
+            cached_haversine(office_pos[0], office_pos[1], u[0],
+                               u[1])
+            for u in user_positions) / len(user_positions)
+
+        # Simple heuristic: higher coherence if users are closer to the driver's path
+        # and not too far from the office
+        score = max(
+            0, 1.0 - (avg_dist_from_driver / 50.0) -
+            (avg_dist_from_office / 100.0))
+        return min(1.0, score)
+
+    def is_user_on_route_path(self,
+                              driver_pos,
+                              current_user_positions,
+                              user_pos,
+                              office_pos,
+                              max_detour_ratio=1.5,
+                              route_type="optimization"):
+        # Mock implementation: always returns True for simplicity in mock
+        return True
+
+    def get_road_distance(self, lat1, lon1, lat2, lon2):
+        # Mock implementation: returns haversine distance
+        return cached_haversine(lat1, lon1, lat2, lon2)
+
+    def find_nearest_road_node(self, lat, lon):
+        # Mock implementation
+        return None, None
+
+    def simplify_path_nodes(self, path, max_nodes=10):
+        # Mock implementation
+        return path
+
+
+_mock_network = MockRoadNetwork()
+
 try:
-    import roadNetwork.roadNetwork as road_network_module
-    # Create an instance of RoadNetwork class if it exists
-    try:
-        # Try to create RoadNetwork instance (assuming GraphML file exists)
-        # Get absolute path to GraphML file - go up 3 levels from algorithm/road/ to project root, then to roadNetwork/
-        script_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))  # Go up from algorithm/road/ to project root
-        graphml_path = os.path.join(script_dir, 'roadNetwork', 'tricity_main_roads.graphml')
-
-        road_network = road_network_module.RoadNetwork(graphml_path)
-        logger.info("Successfully loaded RoadNetwork with GraphML data")
-    except Exception as e:
-        logger.warning(
-            f"Could not create RoadNetwork instance: {e}. Using mock implementation."
-        )
-
-        class MockRoadNetwork:
-
-            def get_route_coherence_score(self, driver_pos, user_positions,
-                                          office_pos):
-                # Mock implementation: returns a score based on simple distance heuristic
-                if not user_positions:
-                    return 1.0
-                avg_dist_from_driver = sum(
-                    cached_haversine(driver_pos[0], driver_pos[1], u[0],
-                                       u[1])
-                    for u in user_positions) / len(user_positions)
-                avg_dist_from_office = sum(
-                    cached_haversine(office_pos[0], office_pos[1], u[0],
-                                       u[1])
-                    for u in user_positions) / len(user_positions)
-
-                # Simple heuristic: higher coherence if users are closer to the driver's path
-                # and not too far from the office
-                score = max(
-                    0, 1.0 - (avg_dist_from_driver / 50.0) -
-                    (avg_dist_from_office / 100.0))
-                return min(1.0, score)
-
-            def is_user_on_route_path(self,
-                                      driver_pos,
-                                      current_user_positions,
-                                      user_pos,
-                                      office_pos,
-                                      max_detour_ratio=1.5,
-                                      route_type="optimization"):
-                # Mock implementation: always returns True for simplicity in mock
-                return True
-
-            def get_road_distance(self, lat1, lon1, lat2, lon2):
-                # Mock implementation: returns haversine distance
-                return cached_haversine(lat1, lon1, lat2, lon2)
-
-            def find_nearest_road_node(self, lat, lon):
-                # Mock implementation
-                return None, None
-
-            def simplify_path_nodes(self, path, max_nodes=10):
-                # Mock implementation
-                return path
-
-        road_network = MockRoadNetwork()
-except ImportError:
+    import roadNetwork.router as road_network_router
+    _road_network_manager = road_network_router.road_network_manager
+except Exception as e:
     logger.warning(
-        "road_network module not found. Road network features will be limited."
+        f"RoadNetworkManager unavailable ({e}). Road network features will be limited."
     )
+    _road_network_manager = None
 
-    class MockRoadNetwork:
 
-        def get_route_coherence_score(self, driver_pos, user_positions,
-                                      office_pos):
-            # Mock implementation: returns a score based on simple distance heuristic
-            if not user_positions:
-                return 1.0
-            avg_dist_from_driver = sum(
-                cached_haversine(driver_pos[0], driver_pos[1], u[0],
-                                   u[1])
-                for u in user_positions) / len(user_positions)
-            avg_dist_from_office = sum(
-                cached_haversine(office_pos[0], office_pos[1], u[0],
-                                   u[1])
-                for u in user_positions) / len(user_positions)
+class _LazyRoadNetwork:
+    """Delegates to the shared road network from the manager, resolving it
+    lazily on first attribute access (and caching the resolution in this
+    module's global so later accesses skip the proxy entirely)."""
 
-            # Simple heuristic: higher coherence if users are closer to the driver's path
-            # and not too far from the office
-            score = max(
-                0, 1.0 - (avg_dist_from_driver / 50.0) -
-                (avg_dist_from_office / 100.0))
-            return min(1.0, score)
+    def __getattr__(self, name):
+        if _road_network_manager is not None:
+            network = _road_network_manager.get_road_network(
+                wait_timeout=300.0, force_wait=True)
+            # Resolve permanently to whatever we ended up with — the real
+            # network, or the mock if loading failed / force-wait timed out
+            resolved = network if network is not None else _mock_network
+            globals()["road_network"] = resolved
+            return getattr(resolved, name)
+        return getattr(_mock_network, name)
 
-        def is_user_on_route_path(self,
-                                  driver_pos,
-                                  current_user_positions,
-                                  user_pos,
-                                  office_pos,
-                                  max_detour_ratio=1.5,
-                                  route_type="optimization"):
-            # Mock implementation: always returns True for simplicity in mock
-            return True
 
-        def get_road_distance(self, lat1, lon1, lat2, lon2):
-            # Mock implementation: returns haversine distance
-            return cached_haversine(lat1, lon1, lat2, lon2)
-
-        def find_nearest_road_node(self, lat, lon):
-            # Mock implementation
-            return None, None
-
-        def simplify_path_nodes(self, path, max_nodes=10):
-            # Mock implementation
-            return path
-
-    road_network = MockRoadNetwork()
+road_network = _LazyRoadNetwork() if _road_network_manager is not None else _mock_network
 
 
 # Load and validate configuration with route optimization settings
@@ -2564,7 +2534,7 @@ def get_user_coordinates(user):
     return float(lat), float(lng)
 
 # MAIN ASSIGNMENT FUNCTION FOR ROUTE OPTIMIZATION
-def run_road_aware_assignment(source_id: str, parameter: int = 1, string_param: str = "", ridesetting: str = ""):
+def run_road_aware_assignment(source_id: str, parameter: int = 1, string_param: str = "", choice: str = ""):
     """
     Main assignment function optimized for route optimization approach:
     - Routes capacity utilization and route efficiency
@@ -2602,7 +2572,7 @@ def run_road_aware_assignment(source_id: str, parameter: int = 1, string_param: 
 
     try:
         # Load and validate data
-        data = load_env_and_fetch_data(source_id, parameter, string_param)
+        data = load_env_and_fetch_data(source_id, parameter, string_param, choice)
         progress.update_stage_progress("Data loaded successfully")
 
         # Algorithm-level caching check
@@ -2618,7 +2588,7 @@ def run_road_aware_assignment(source_id: str, parameter: int = 1, string_param: 
                 current_signature = cache.generate_data_signature(data, {
                     'parameter': parameter,
                     'string_param': string_param,
-                    'choice': ridesetting,
+                    'choice': choice,
                     'algorithm': 'route_optimization_assignment'
                 })
 
@@ -2638,9 +2608,9 @@ def run_road_aware_assignment(source_id: str, parameter: int = 1, string_param: 
         # Convert 'latitude'/'longitude' to 'lat'/'lng' for consistency with algorithms
         for user in data.get('users', []):
             if 'latitude' in user and 'lat' not in user:
-                user['latitude'] = user['latitude']
+                user['lat'] = user['latitude']
             if 'longitude' in user and 'lng' not in user:
-                user['longitude'] = user['longitude']
+                user['lng'] = user['longitude']
 
         # Also normalize driver coordinates
         for driver in data.get('drivers', {}).get('driversUnassigned', []):
@@ -2930,7 +2900,7 @@ def run_road_aware_assignment(source_id: str, parameter: int = 1, string_param: 
                 current_signature = cache.generate_data_signature(data, {
                     'parameter': parameter,
                     'string_param': string_param,
-                    'choice': ridesetting,
+                    'choice': choice,
                     'algorithm': 'route_optimization_assignment'
                 })
 

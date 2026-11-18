@@ -1,0 +1,20 @@
+[project]
+name = "ucruise"
+version = "0.1.0"
+description = "Driver assignment and route optimization API (FastAPI)"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi",
+    "uvicorn[standard]",
+    "pydantic>=1.10,<2",  # code uses v1 API (@validator, class Config)
+    "requests",
+    "python-dotenv",
+    "numpy",
+    "pandas",
+    "scikit-learn",
+    "scipy",
+    "networkx",
+    "python-multipart",
+    "jinja2",
+    "aiofiles",
+]

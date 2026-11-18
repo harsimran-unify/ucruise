@@ -2277,7 +2277,7 @@ def run_balance_assignment_simplified(source_id: str, parameter: int = 1, string
 
     try:
         # Load and validate data
-        data = load_env_and_fetch_data(source_id, parameter, string_param)
+        data = load_env_and_fetch_data(source_id, parameter, string_param, choice)
 
         # Algorithm-level caching check
         db_name = source_id if source_id and source_id != "1" else data.get("db", "default")
@@ -2496,7 +2496,7 @@ def run_balance_assignment_simplified(source_id: str, parameter: int = 1, string
             if "drivers" in data:
                 all_drivers_data = data["drivers"].get("driversUnassigned", []) + data["drivers"].get("driversAssigned", [])
             else:
-                all_drivers_data = data.get("driversUnassigned", []) + data["driversAssigned", []]
+                all_drivers_data = data.get("driversUnassigned", []) + data.get("driversAssigned", [])
 
             for driver in all_drivers_data:
                 if str(driver.get('id', driver.get('sub_user_id', ''))) == driver_id:

@@ -2314,7 +2314,7 @@ def run_safety_assignment_simplified(source_id: str, parameter: int = 1, string_
 
     try:
         # Load and validate data
-        data = load_env_and_fetch_data(source_id, parameter, string_param)
+        data = load_env_and_fetch_data(source_id, parameter, string_param, choice)
 
         # Algorithm-level caching check
         db_name = source_id if source_id and source_id != "1" else data.get("db", "default")

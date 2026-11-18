@@ -563,36 +563,6 @@ def safe_add_user_to_route_with_eviction_aggressive(route, new_user, assigned_us
         return False, None
 
 
-    """
-    Adds user to route safely:
-      - normalizes user id
-      - checks capacity (capacity/vehicle_capacity/vehicle_type)
-      - checks global duplicate set (assigned_user_ids)
-    assigned_user_ids can be None (will not check global duplicates) but will be updated if provided.
-    Returns True if added; False otherwise.
-    """
-    uid = normalize_user_id(user_obj)
-    if not uid:
-        return False
-    if not can_add_user_to_route(route, uid, assigned_user_ids):
-        return False
-
-    if isinstance(user_obj, dict) and 'user_id' in user_obj:
-        u = copy.deepcopy(user_obj)
-    else:
-        u = build_user_dict_from_row(user_obj)
-    u['user_id'] = str(uid)
-    if 'lat' not in u:
-        u['lat'] = float(u.get('latitude', 0) or 0)
-    if 'lng' not in u:
-        u['lng'] = float(u.get('longitude', 0) or 0)
-
-    route.setdefault('assigned_users', []).append(u)
-    if assigned_user_ids is not None:
-        assigned_user_ids.add(uid)
-    return True
-
-
 def remove_duplicate_users_from_routes(routes):
     # Keep best (most fields) user object for each uid, then rebuild route lists
     best = {}
@@ -1383,7 +1353,7 @@ def run_capacity_assignment_simplified(source_id: str,
 
     try:
         # load data exactly as original implementation expected
-        data = load_env_and_fetch_data(source_id, parameter, string_param)
+        data = load_env_and_fetch_data(source_id, parameter, string_param, choice)
 
         # caching (optional)
         db_name = source_id if source_id and source_id != "1" else data.get(

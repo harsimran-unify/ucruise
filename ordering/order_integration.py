@@ -11,7 +11,7 @@ from typing import List, Dict, Any, Tuple
 from logger import get_logger
 
 from .route_cache import RouteCache, apply_cached_orders
-from .google_optimizer import get_google_optimizer, batch_optimize_routes
+from .google_optimizer import get_google_optimizer, batch_optimize_routes, read_user_coordinates
 
 logger = get_logger()
 
@@ -181,6 +181,20 @@ class OrderIntegration:
 
         # Multiple users - apply nearest neighbor algorithm starting from OFFICE
         enhanced_route = route.copy()
+
+        # Resolve all coordinates up front; if any user has unusable
+        # coordinates, keep the original order rather than producing a
+        # wrong sequence or crashing on haversine(None, ...)
+        for user in assigned_users:
+            lat, lng = read_user_coordinates(user)
+            if lat is None or lng is None:
+                logger.warning(
+                    f"Route {driver_id}: user {user.get('user_id', '?')} has no usable "
+                    f"coordinates - keeping original order"
+                )
+                enhanced_route["ordering_source"] = "failed_coordinates"
+                return enhanced_route
+
         current_pos = (office_lat, office_lon)  # Start from OFFICE
         remaining_users = assigned_users.copy()
         ordered_users = []
@@ -194,7 +208,7 @@ class OrderIntegration:
             nearest_index = -1
 
             for i, user in enumerate(remaining_users):
-                user_pos = (user.get("lat"), user.get("lng"))
+                user_pos = read_user_coordinates(user)
                 distance = self._haversine_distance(
                     current_pos[0], current_pos[1],
                     user_pos[0], user_pos[1]
@@ -213,7 +227,7 @@ class OrderIntegration:
 
                 # Update current position and total distance
                 total_distance += nearest_distance
-                current_pos = (nearest_user.get("lat"), nearest_user.get("lng"))
+                current_pos = read_user_coordinates(nearest_user)
 
                 # Remove from remaining users
                 remaining_users.pop(nearest_index)

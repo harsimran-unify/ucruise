@@ -439,28 +439,56 @@ def extract_office_coordinates(data):
     return office_lat, office_lon
 
 
+def _safe_coordinate(value):
+    """Return a float coordinate, or None when missing/null/invalid.
+
+    Never coerce to 0.0 — a missing coordinate silently placed at (0, 0)
+    corrupts clustering and distance math for the whole run.
+    """
+    if value is None:
+        return None
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return None
+
+
 def prepare_user_driver_dataframes(data):
     """Prepare user and driver dataframes from API data"""
+    logger = get_logger()
+
     # Prepare user DataFrame
     users = data.get("users", [])
     user_data = []
     for user in users:
+        lat = _safe_coordinate(user.get('latitude'))
+        lon = _safe_coordinate(user.get('longitude'))
+        if lat is None or lon is None:
+            logger.warning(
+                f"⚠️ Skipping user {user.get('id', '?')}: missing or invalid coordinates "
+                f"({user.get('latitude')!r}, {user.get('longitude')!r})"
+            )
+            continue
+        office_distance = _safe_coordinate(user.get('office_distance'))
         user_data.append({
             'user_id':
             str(user.get('id', '')),
             'latitude':
-            float(user.get('latitude', 0.0)),
+            lat,
             'longitude':
-            float(user.get('longitude', 0.0)),
+            lon,
             'first_name':
             str(user.get('first_name', '')),
             'email':
             str(user.get('email', '')),
             'office_distance':
-            float(user.get('office_distance', 0.0))
+            office_distance if office_distance is not None else 0.0
         })
 
-    user_df = pd.DataFrame(user_data)
+    user_df = pd.DataFrame(
+        user_data,
+        columns=['user_id', 'latitude', 'longitude', 'first_name', 'email',
+                 'office_distance'])
 
     # Prepare driver DataFrame
     all_drivers = []
@@ -474,16 +502,36 @@ def prepare_user_driver_dataframes(data):
 
     driver_data = []
     for i, driver in enumerate(all_drivers):
+        lat = _safe_coordinate(driver.get('latitude'))
+        lon = _safe_coordinate(driver.get('longitude'))
+        if lat is None or lon is None:
+            logger.warning(
+                f"⚠️ Skipping driver {driver.get('id', '?')}: missing or invalid coordinates "
+                f"({driver.get('latitude')!r}, {driver.get('longitude')!r})"
+            )
+            continue
+        raw_capacity = driver.get('capacity')
+        try:
+            capacity = int(raw_capacity) if raw_capacity is not None else 1
+        except (TypeError, ValueError):
+            logger.warning(
+                f"⚠️ Driver {driver.get('id', '?')}: invalid capacity "
+                f"{raw_capacity!r}, defaulting to 1"
+            )
+            capacity = 1
         driver_data.append({
             'driver_id': str(driver.get('id', '')),
-            'latitude': float(driver.get('latitude', 0.0)),
-            'longitude': float(driver.get('longitude', 0.0)),
-            'capacity': int(driver.get('capacity', 1)),
+            'latitude': lat,
+            'longitude': lon,
+            'capacity': capacity,
             'vehicle_id': str(driver.get('vehicle_id', '')),
             'priority': i + 1  # Simple priority based on order
         })
 
-    driver_df = pd.DataFrame(driver_data)
+    driver_df = pd.DataFrame(
+        driver_data,
+        columns=['driver_id', 'latitude', 'longitude', 'capacity',
+                 'vehicle_id', 'priority'])
 
     return user_df, driver_df
 

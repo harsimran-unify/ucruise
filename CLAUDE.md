@@ -8,17 +8,19 @@ A FastAPI service (ucruise) that assigns office-commute users to drivers, optimi
 
 ## Commands
 
+The project uses **uv** (see `pyproject.toml`, `.python-version`; `requirements.txt` is legacy and unpinned — pyproject pins `pydantic<2` because the code uses the v1 API). All Python commands go through `uv run`:
+
 ```powershell
-pip install -r requirements.txt
-uvicorn main:app --host 0.0.0.0 --port 5000 --reload   # from project root
+uv sync                                                # first setup / after dep changes
+uv run uvicorn main:app --host 0.0.0.0 --port 5000 --reload   # from project root
 ```
 
 Local end-to-end harness — run from inside `localTesting/` (it derives the project root as the parent of CWD). It starts the server, triggers an assignment, prints analytics, and opens the dashboard:
 
 ```powershell
 cd localTesting
-python run_and_view.py [--source-id X --parameter 1 --string-param "Evening shift" --choice " "]
-python test_analysis.py    # direct in-process test, no HTTP layer
+uv run python run_and_view.py [--source-id X --parameter 1 --string-param "Evening shift" --choice " "]
+uv run python test_analysis.py    # direct in-process test, no HTTP layer
 ```
 
 There is no test suite or linter. Verification is manual: inspect the API response, `logs/assignment_*.log`, and the dashboard at `http://localhost:5000/visualize` (served from `localTesting/visualize.html`).
