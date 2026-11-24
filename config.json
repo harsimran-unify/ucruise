@@ -3,6 +3,7 @@
   "max_fill_distance_km": 4.0,
   "merge_distance_km": 2.5,
   "road_network": {
+    "provider": "matrix",
     "max_search_radius_km": 5.0,
     "fallback_search_radius_km": 10.0,
     "max_detour_ratio": 3.0,
@@ -113,7 +114,31 @@
     }
   },
   "disable_algorithm_cache": true,
+  "solver": {
+    "enabled": true,
+    "runtime_seconds": 3.0,
+    "seed": 1,
+    "drop_penalty_km": 40.0,
+    "vehicle_fixed_cost_km": 6.0,
+    "profiles": {
+      "route_efficiency": {"drop_penalty_km": 40.0, "vehicle_fixed_cost_km": 6.0},
+      "capacity_optimization": {"drop_penalty_km": 60.0, "vehicle_fixed_cost_km": 14.0},
+      "balanced_optimization": {"drop_penalty_km": 40.0, "vehicle_fixed_cost_km": 2.0},
+      "road_aware_route_optimization": {"drop_penalty_km": 40.0, "vehicle_fixed_cost_km": 6.0}
+    }
+  },
+  "routing": {
+    "engines": ["osrm", "google", "haversine"],
+    "osrm_default_url": "http://localhost:5001",
+    "osrm_timeout_s": 5.0,
+    "google_element_budget": 1000,
+    "google_min_request_interval_s": 0.1,
+    "cache_enabled": true,
+    "cache_max_entries": 50000,
+    "max_reasonable_ratio": 3.0
+  },
   "route_ordering": {
+    "optimizer": "solver",
     "enable_google_optimization": true,
     "google_api_rate_limit": 100,
     "cache_retention_days": 30,

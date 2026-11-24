@@ -574,35 +574,66 @@ def assign_drivers(source_id: str, parameter: int, string_param: str,
                 print(f"🤖 Detected algorithm priority: {algorithm_priority}")
                 print(f"🔍 Raw ride_settings: {ride_settings}")
 
+                # Phase 3/4: solver pipeline replaces the legacy mode
+                # pipelines when config solver.enabled is true. Safety mode
+                # always stays legacy (gender constraints are not expressible
+                # in the VRP model — see docs/solver-migration-report.md).
+                from algorithm.solver_opt.solver_pipeline import solver_enabled
+                use_solver = solver_enabled()
+
                 # Route to appropriate algorithm based on priority
                 if algorithm_priority == 1:
-                    print("🎪 Using CAPACITY OPTIMIZATION (Priority 1)")
-                    from algorithm.capacity.capacity import run_assignment_capacity
-                    result = run_assignment_capacity(source_id, parameter,
-                                                     string_param, choice)
+                    if use_solver:
+                        print("🎪 Using SOLVER CAPACITY profile (Priority 1)")
+                        from algorithm.solver_opt.solver_pipeline import run_solver_capacity_assignment
+                        result = run_solver_capacity_assignment(source_id, parameter,
+                                                                string_param, choice)
+                    else:
+                        print("🎪 Using CAPACITY OPTIMIZATION (Priority 1)")
+                        from algorithm.capacity.capacity import run_assignment_capacity
+                        result = run_assignment_capacity(source_id, parameter,
+                                                         string_param, choice)
                     result["optimization_mode"] = "capacity_optimization"
 
                 elif algorithm_priority == 2:
-                    print("⚖️ Using BALANCED OPTIMIZATION (Priority 2)")
-                    from algorithm.balance.balance import run_assignment_balance
-                    result = run_assignment_balance(source_id, parameter,
-                                                    string_param, choice)
+                    if use_solver:
+                        print("⚖️ Using SOLVER BALANCED profile (Priority 2)")
+                        from algorithm.solver_opt.solver_pipeline import run_solver_balance_assignment
+                        result = run_solver_balance_assignment(source_id, parameter,
+                                                               string_param, choice)
+                    else:
+                        print("⚖️ Using BALANCED OPTIMIZATION (Priority 2)")
+                        from algorithm.balance.balance import run_assignment_balance
+                        result = run_assignment_balance(source_id, parameter,
+                                                        string_param, choice)
                     result["optimization_mode"] = "balanced_optimization"
 
                 elif algorithm_priority == 3:
-                    print("🗺️ Using ROAD-AWARE ROUTING (Priority 3)")
-                    from algorithm.road.road import run_road_aware_assignment
-                    result = run_road_aware_assignment(source_id, parameter,
-                                                       string_param, choice)
+                    if use_solver:
+                        print("🗺️ Using SOLVER ROAD-AWARE profile (Priority 3)")
+                        from algorithm.solver_opt.solver_pipeline import run_solver_road_assignment
+                        result = run_solver_road_assignment(source_id, parameter,
+                                                            string_param, choice)
+                    else:
+                        print("🗺️ Using ROAD-AWARE ROUTING (Priority 3)")
+                        from algorithm.road.road import run_road_aware_assignment
+                        result = run_road_aware_assignment(source_id, parameter,
+                                                           string_param, choice)
                     result["optimization_mode"] = "road_aware_route_optimization"
 
                 else:
-                    print(
-                        f"🎯 Using ROUTE EFFICIENCY (Default) - priority was: {algorithm_priority}"
-                    )
-                    from algorithm.base.base import run_assignment
-                    result = run_assignment(source_id, parameter, string_param,
-                                            choice)
+                    if use_solver:
+                        print(f"🧩 Using SOLVER ROUTE-EFFICIENCY profile (Default) - priority was: {algorithm_priority}")
+                        from algorithm.solver_opt.solver_pipeline import run_solver_route_efficiency_assignment
+                        result = run_solver_route_efficiency_assignment(source_id, parameter,
+                                                                        string_param, choice)
+                    else:
+                        print(
+                            f"🎯 Using ROUTE EFFICIENCY (Default) - priority was: {algorithm_priority}"
+                        )
+                        from algorithm.base.base import run_assignment
+                        result = run_assignment(source_id, parameter, string_param,
+                                                choice)
                     result["optimization_mode"] = "route_efficiency_default"
 
         else:

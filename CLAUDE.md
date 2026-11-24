@@ -21,6 +21,11 @@ Local end-to-end harness — run from inside `localTesting/` (it derives the pro
 cd localTesting
 uv run python run_and_view.py [--source-id X --parameter 1 --string-param "Evening shift" --choice " "]
 uv run python test_analysis.py    # direct in-process test, no HTTP layer
+uv run python baseline_metrics.py [--only <mode>]  # Phase 0+ harness: runs all modes, writes baseline/*.json
+uv run python validate_routing.py [--pairs 20]     # Phase 1: road-distance spot check per engine
+uv run python test_solver_ordering.py              # Phase 2 unit test
+uv run python test_solver_pipeline.py              # Phase 3 unit test (synthetic PyVRP instances)
+uv run python test_road_adapter.py                 # Phase 1 unit test (MatrixRoadNetwork contract)
 ```
 
 There is no test suite or linter (an httpx dev-dependency enables FastAPI's TestClient for ad-hoc checks). Verification is manual: inspect the API response, `logs/assignment_*.log`, and the dashboard at `http://localhost:5000/visualize` (served from `localTesting/visualize.html` — its ALGORITHM sidebar loads `/routes-all`, switches per-mode results in memory, and triggers `/assign-drivers-all` on the local_server wrapper). Note: `localTesting/` is gitignored — dashboard fixes don't reach the server copy automatically.
@@ -31,15 +36,16 @@ Key endpoints: `POST /assign-drivers/{source_id}/{parameter}/{string_param}/{cho
 
 - `.env` at project root (gitignored): `API_URL`, `API_AUTH_TOKEN` (external data API), `GOOGLE_MAPS_API_KEY`.
 - `config.json` at project root is the central tuning file for all algorithms. Per-mode values in `mode_configs` override top-level defaults; road-network thresholds in it mirror the hardcoded `RoadAwareConfig` in `roadNetwork/config.py`.
-- `disable_algorithm_cache: true` and `route_ordering.enable_route_cache: false` are both currently set — every run recomputes and hits Google fresh.
+- `disable_algorithm_cache: true` and `route_ordering.enable_route_cache: false` are both currently set — every run recomputes and hits Google fresh. `solver.enabled: true` routes the four non-safety modes to the PyVRP pipeline; `route_ordering.optimizer` is `"solver"` (decided 2026-11-19 — zero Google ordering calls; set `"google"` for Directions-ordered stops).
 
 ## Assignment flow (main.py → algorithm/)
 
 1. The `/assign-drivers/...` endpoint fetches users/drivers from the external API via `load_env_and_fetch_data` in `algorithm/base/base.py` — a GET to `{API_URL}/{source_id}/{parameter}/{string_param}/{choice}` with a Bearer token.
 2. Algorithm selection (implemented in both main.py's endpoint and `run_assignment` in base.py, same rules):
-   - `safety == 1` in the API response overrides everything → `algorithm/safety/safety.py`
+   - `safety == 1` in the API response overrides everything → `algorithm/safety/safety.py` (always legacy — gender pairing is not expressible in the VRP model)
    - otherwise `ride_settings.pic_priority` (falling back to `drop_priority`): 1 → capacity, 2 → balanced, 3 → road-aware, anything else → route efficiency
-   - any data-fetch error falls back to route efficiency
+   - **when `config.json` `solver.enabled` is true (currently set), priorities 1/2/3/default route to the PyVRP solver pipeline** (`algorithm/solver_opt/solver_pipeline.py`) with the selected mode as its profile; set `solver.enabled: false` to return to the legacy pipelines
+   - any data-fetch error falls back to route efficiency (legacy)
 3. The result is shaped into the standardized payload defined by `algorithm/response/response_standards.py` and built by `response_builder.py` (`{status, execution_time, data, unassignedUsers, unassignedDrivers, optimization_mode, ...}`), written to `drivers_and_routes.json`, and returned. `GET /routes` reads that file back.
 
 ## The five algorithm modules are intentionally self-contained
@@ -53,7 +59,15 @@ Key endpoints: `POST /assign-drivers/{source_id}/{parameter}/{string_param}/{cho
 
 ## Pickup ordering (ordering/)
 
-`OrderIntegration.apply_optimal_ordering` chains: cached orders → Google Directions batch optimization (`google_optimizer.py`, rate-limited) → haversine nearest-neighbor fallback. The fallback chains pickups starting from the office coordinates, not the driver's position.
+`OrderIntegration.apply_optimal_ordering` chains: cached orders → primary optimizer → fallback. `route_ordering.optimizer` picks the primary: `"solver"` (current default — TSP over the routing chain: free, cached, starts from the driver, ends at the office) or `"google"` (Directions-ordered, per-call billed). The fallback is the solver TSP too; the old office-start nearest-neighbor is only kept as `_optimize_single_route_fallback` for direct callers.
+
+## Routing matrix (routing/)
+
+One interface for road distances: OSRM (self-hosted, `OSRM_URL` env) → Google Routes matrix (billed per element, session budget `routing.google_element_budget`; the key currently needs the Routes API enabled in Cloud Console — it 403s) → haversine (always available). `road_network.provider` in config.json: `"matrix"` (default) uses `MatrixRoadNetwork` for the road-aware mode when any external engine is up, otherwise falls back to the GraphML graph automatically. Distances cache to `routing/cache/point_distances.json` with per-entry engine stamps.
+
+## Solver pipeline (algorithm/solver_opt/)
+
+`run_solver_assignment(mode=...)` — one PyVRP global solve replaces clustering→assignment→sequencing→merging→splitting: drivers are vehicle types (capacity, start depot = home, end depot = office), users are optional clients with a drop penalty, distances from `routing/`. `solver.profiles` in config.json tunes each mode (fixed cost per used vehicle + drop penalty) — capacity = high fixed cost (consolidate), balanced = low (spread). Dispatch gates: `solver.enabled` in main.py and base.run_assignment; safety mode never uses the solver. Depends on `pyvrp` (via uv).
 
 ## Road network (roadNetwork/)
 

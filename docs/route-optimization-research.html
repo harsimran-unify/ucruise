@@ -1,0 +1,464 @@
+<title>Ridepool Solver Research</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+  /* Layout concept: single-column technical memo, 72ch prose, full-width scrollable tables.
+     Palette: cool paper neutrals with a slight blue bias, signal-orange accent (route/markings),
+     semantic chips for solver scoring. Type: IBM Plex Sans for text, IBM Plex Mono for refs + data. */
+  :root {
+    --bg: #F5F6F7;
+    --fg: #1C2630;
+    --muted: #5B6B7A;
+    --line: #D9DFE4;
+    --card: #FFFFFF;
+    --accent: #BC3E04;
+    --accent-soft: #FBEDE6;
+    --good: #22703F;
+    --good-soft: #E2F1E7;
+    --warn: #96660A;
+    --warn-soft: #F6EECF;
+    --bad: #B03A2E;
+    --bad-soft: #F6E3E0;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #14191F;
+      --fg: #E5EAEE;
+      --muted: #96A5B3;
+      --line: #2C3844;
+      --card: #1B232B;
+      --accent: #F0792E;
+      --accent-soft: #33241A;
+      --good: #58BE86;
+      --good-soft: #1A2D22;
+      --warn: #DCAF3C;
+      --warn-soft: #2E2714;
+      --bad: #E5695C;
+      --bad-soft: #301B18;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #14191F;
+    --fg: #E5EAEE;
+    --muted: #96A5B3;
+    --line: #2C3844;
+    --card: #1B232B;
+    --accent: #F0792E;
+    --accent-soft: #33241A;
+    --good: #58BE86;
+    --good-soft: #1A2D22;
+    --warn: #DCAF3C;
+    --warn-soft: #2E2714;
+    --bad: #E5695C;
+    --bad-soft: #301B18;
+    color-scheme: dark;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+    font-size: 15px;
+    line-height: 1.62;
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+  }
+  .page { max-width: 860px; margin: 0 auto; padding-block: 28px 64px; }
+
+  .eyebrow {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 11px; font-weight: 500;
+    letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--muted);
+  }
+  h1 {
+    font-size: clamp(28px, 6vw, 40px);
+    font-weight: 700; line-height: 1.15; letter-spacing: -0.015em;
+    text-wrap: balance; margin: 10px 0 8px;
+  }
+  .meta {
+    display: flex; flex-wrap: wrap; gap: 6px 18px;
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 12px; color: var(--muted);
+    padding-bottom: 18px; border-bottom: 1px solid var(--line);
+  }
+
+  .routemap { margin: 22px 0 4px; }
+  .routemap svg { display: block; width: 100%; height: auto; }
+
+  nav.toc {
+    margin: 22px 0 0; padding: 14px 18px;
+    background: var(--card); border: 1px solid var(--line);
+    display: flex; flex-wrap: wrap; gap: 4px 18px;
+    font-size: 13px;
+  }
+  nav.toc a { color: var(--muted); text-decoration: none; }
+  nav.toc a:hover { color: var(--accent); }
+  nav.toc .n { font-family: "IBM Plex Mono", ui-monospace, monospace; color: var(--accent); margin-right: 5px; }
+
+  section { margin-top: 44px; }
+  h2 {
+    font-size: 21px; font-weight: 700; letter-spacing: -0.01em;
+    text-wrap: balance; margin: 0 0 4px;
+  }
+  h2 .n {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 13px; font-weight: 500; color: var(--accent);
+    margin-right: 10px; vertical-align: 2px;
+  }
+  h3 { font-size: 16px; font-weight: 600; margin: 26px 0 6px; text-wrap: balance; }
+  p { margin: 10px 0; max-width: 72ch; }
+  p.lead { font-size: 16px; color: var(--fg); }
+  ul, ol { margin: 10px 0; padding-left: 22px; max-width: 72ch; }
+  li { margin: 5px 0; }
+
+  code {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 0.86em;
+    background: var(--accent-soft);
+    padding: 1px 5px;
+    border-radius: 4px;
+  }
+
+  .recommend {
+    margin-top: 24px; padding: 20px 22px;
+    background: var(--accent-soft);
+    border: 1px solid var(--accent);
+  }
+  .recommend .eyebrow { color: var(--accent); }
+  .recommend p { margin: 8px 0 0; }
+  .recommend strong { font-weight: 700; }
+
+  .tbl-wrap { overflow-x: auto; margin: 16px 0 6px; border: 1px solid var(--line); background: var(--card); }
+  table { border-collapse: collapse; width: 100%; min-width: 640px; font-size: 13.5px; }
+  caption { text-align: left; font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); padding: 10px 14px 0; }
+  th, td { text-align: left; padding: 9px 12px; border-top: 1px solid var(--line); vertical-align: top; }
+  thead th {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 11px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--muted); border-top: none;
+    background: var(--bg);
+    white-space: nowrap;
+  }
+  td .mono, .mono { font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 12px; }
+  td code { background: var(--accent-soft); white-space: nowrap; }
+  tbody tr:first-child td { border-top: none; }
+  .num { font-variant-numeric: tabular-nums; }
+
+  .chip {
+    display: inline-block; font-size: 11.5px; font-weight: 600;
+    padding: 1px 8px 2px; border-radius: 10px; white-space: nowrap;
+  }
+  .chip.good { color: var(--good); background: var(--good-soft); }
+  .chip.warn { color: var(--warn); background: var(--warn-soft); }
+  .chip.bad  { color: var(--bad);  background: var(--bad-soft); }
+  .chip.neutral { color: var(--muted); background: var(--bg); border: 1px solid var(--line); }
+  .chip.accent { color: var(--accent); background: var(--accent-soft); border: 1px solid var(--accent); }
+
+  .pipeline { list-style: none; padding: 0; margin: 14px 0; }
+  .pipeline li {
+    display: flex; gap: 12px; align-items: baseline;
+    padding: 7px 0; border-top: 1px dashed var(--line);
+  }
+  .pipeline li:first-child { border-top: none; }
+  .pipeline .stage { flex: 0 0 9.5em; font-weight: 600; font-size: 13.5px; }
+  .pipeline .what { min-width: 0; color: var(--fg); font-size: 13.5px; }
+
+  .phase { margin: 18px 0; padding: 16px 18px 14px; background: var(--card); border: 1px solid var(--line); }
+  .phase .ph-head { display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: baseline; }
+  .phase .ph-id {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 12px; font-weight: 500; color: var(--accent); white-space: nowrap;
+  }
+  .phase .ph-name { font-weight: 700; font-size: 15px; }
+  .phase .ph-tag { margin-left: auto; }
+  .phase p { font-size: 13.5px; margin: 8px 0 4px; }
+  .phase .ph-meta { font-size: 12.5px; color: var(--muted); margin: 4px 0; }
+
+  ol.sources { padding-left: 20px; font-size: 13.5px; }
+  ol.sources li { margin: 6px 0; }
+  ol.sources a { color: var(--accent); }
+  ol.sources .src-id { font-family: "IBM Plex Mono", ui-monospace, monospace; color: var(--muted); margin-right: 6px; }
+
+  a { color: var(--accent); }
+  a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  hr { border: none; border-top: 1px solid var(--line); margin: 36px 0 0; }
+  .footnote { font-size: 12.5px; color: var(--muted); }
+</style>
+
+<div class="page">
+
+  <div class="eyebrow">Technical research report · ucruise</div>
+  <h1>Replacing the ridepool pipelines with a VRP solver</h1>
+  <div class="meta">
+    <span>2026-11-18</span>
+    <span>scope: assignment + pickup-ordering stack</span>
+    <span>status: draft for team review</span>
+  </div>
+
+  <div class="routemap" aria-hidden="true">
+    <svg viewBox="0 0 820 74" role="img">
+      <g fill="none" stroke="var(--line)" stroke-width="1.5">
+        <path d="M 30 22 C 220 22, 420 54, 700 37"/>
+        <path d="M 30 52 C 200 60, 460 26, 700 37"/>
+        <path d="M 30 37 C 240 37, 480 44, 700 37"/>
+        <path d="M 150 66 C 340 66, 560 46, 700 37"/>
+      </g>
+      <g>
+        <circle cx="30" cy="22" r="4.5" fill="var(--accent)"/>
+        <circle cx="30" cy="52" r="4.5" fill="var(--accent)"/>
+        <circle cx="30" cy="37" r="4.5" fill="var(--accent)"/>
+        <circle cx="150" cy="66" r="4.5" fill="var(--accent)"/>
+      </g>
+      <g fill="var(--muted)" font-family="IBM Plex Mono, monospace" font-size="10.5">
+        <text x="42" y="19">driver · start depot</text>
+        <text x="42" y="63">driver · start depot</text>
+      </g>
+      <rect x="700" y="27" width="20" height="20" fill="var(--fg)"/>
+      <text x="728" y="41" fill="var(--muted)" font-family="IBM Plex Mono, monospace" font-size="10.5">office · common end depot</text>
+    </svg>
+  </div>
+
+  <nav class="toc" aria-label="Contents">
+    <a href="#tldr"><span class="n">TL;DR</span>Recommendation</a>
+    <a href="#problem"><span class="n">1</span>What the problem is</a>
+    <a href="#today"><span class="n">2</span>What the code does today</a>
+    <a href="#solvers"><span class="n">3</span>Solver options</a>
+    <a href="#roads"><span class="n">4</span>Road distances</a>
+    <a href="#target"><span class="n">5</span>Target architecture</a>
+    <a href="#roadmap"><span class="n">6</span>Migration roadmap</a>
+    <a href="#verify"><span class="n">7</span>Verifying parity</a>
+    <a href="#sources"><span class="n">§</span>Sources</a>
+  </nav>
+
+  <section id="tldr">
+    <div class="recommend">
+      <div class="eyebrow">Recommendation</div>
+      <p><strong>One solver, five profiles.</strong> Adopt <strong>PyVRP</strong> (in-process, MIT, best measured solution quality) as the primary engine, with <strong>OR-Tools</strong> as the flexibility fallback, and serve road distances from a self-hosted <strong>OSRM</strong> matrix (keep the Google matrix API as the interim source). All five algorithm modes become configuration profiles of the same solve — the five pipelines retire behind a flag after a parity check, not before.</p>
+      <p class="footnote">Highest-value first move, low risk: replace pickup sequencing (<code class="mono">ordering/</code>) with matrix + solver ordering. It touches one module, cuts Google calls per run, and improves every mode at once.</p>
+    </div>
+  </section>
+
+  <section id="problem">
+    <h2><span class="n">1</span>What the problem actually is</h2>
+    <p class="lead">ucruise assigns office-commute users to drivers, groups them, and sequences pickups. That is a named problem in operations research — which means fifty years of methods and maintained solvers apply, and none of them need to be written by hand.</p>
+    <p>The ucruise data contract confirms the shape: users are <code>{id, latitude, longitude}</code>; drivers are <code>{id, capacity, latitude, longitude}</code> from the <code>driversUnassigned</code> + <code>driversAssigned</code> pools (<code>algorithm/base/base.py:221-328</code>). <strong>There are no time-window fields</strong>, so this is a <em>static capacitated, pickup-only, multi-depot open VRP</em>: every vehicle starts at its own depot (the driver's location) and ends at one common sink (the office), without returning home. If shift deadlines ever arrive as data, the same model extends to time windows — but nothing in the API response needs them today.</p>
+
+    <div class="tbl-wrap"><table>
+      <caption>ucruise concept → VRP vocabulary → solver primitive</caption>
+      <thead><tr><th>ucruise stage</th><th>Standard term</th><th>Solver primitive</th></tr></thead>
+      <tbody>
+        <tr><td>User record</td><td>Customer node (pickup-only job)</td><td>Visit with demand 1 seat</td></tr>
+        <tr><td>Driver + capacity + home coords</td><td>Vehicle with distinct start depot</td><td>Per-vehicle start location (PyVRP, OR-Tools, VROOM all support this)</td></tr>
+        <tr><td>Office</td><td>Common end depot, open routes</td><td>Shared end depot; no return leg</td></tr>
+        <tr><td>Geographic clustering (<code>create_geographic_clusters</code>, sweep/polar/bearing variants)</td><td>Cluster-first heuristic</td><td>Unnecessary — solvers assign and sequence jointly</td></tr>
+        <tr><td>Driver→cluster assignment (<code>assign_drivers_by_priority</code>, <code>assign_cab_to_cluster</code>)</td><td>Assignment problem</td><td>Global solve (the Hungarian instinct was right — <code>safety.py</code> already implements it)</td></tr>
+        <tr><td>Pickup sequencing (geodesic ordering, direction-aware 2-opt, Google waypoint optimization)</td><td>Route ordering / TSP</td><td>Native in every solver</td></tr>
+        <tr><td>Splitting, merging, swaps, outlier reassignment, route filling (~40 functions per pipeline)</td><td>Inter-route local search</td><td>Built-in neighborhoods: relocate, swap, 2-opt*, ruin-and-recreate</td></tr>
+        <tr><td>Unassigned users/drivers output</td><td>Dropped customers</td><td>Optional visits with penalty — PyVRP prizes, OR-Tools disjunctions</td></tr>
+        <tr><td>Safety mode gender rules</td><td>Pairing constraint</td><td>VROOM skills; PyVRP penalties/groups; OR-Tools allowed-vehicle sets</td></tr>
+        <tr><td>Road-aware GraphML detour costs</td><td>Asymmetric travel costs</td><td>Cost matrix from OSRM <code>/table</code></td></tr>
+        <tr><td><code>mode_configs</code> (4 modes)</td><td>Objective weights / constraints</td><td>Solver profile — one engine, four configurations</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <section id="today">
+    <h2><span class="n">2</span>What the code does today</h2>
+    <p>Five self-contained pipelines, each re-implementing the same six stages with different weights. Shared helpers exist in <code>algorithm/base/base.py</code>, but only safety and road import from it — capacity and balance duplicate geometry utilities locally. A behavioral fix has to be found and mirrored in up to five places.</p>
+
+    <div class="tbl-wrap"><table>
+      <caption>The five pipelines and what is unique in each</caption>
+      <thead><tr><th>Pipeline</th><th>Size</th><th>Common stages</th><th>Unique contribution</th></tr></thead>
+      <tbody>
+        <tr><td><code>base.py</code> route-efficiency</td><td class="num">~4.1k lines</td><td rowspan="5" style="max-width:230px">clustering → capacity subclustering → driver assignment → sequencing + 2-opt → splitting → merging → seat filling → outlier reassignment → swaps</td><td>Richest heuristic set: sweep/polar sectors, bearing-aware subclusters, tortuosity and turning-score scoring</td></tr>
+        <tr><td><code>capacity/capacity.py</code></td><td class="num">~1.9k</td><td>Seat filling <em>with eviction candidates</em>; hierarchical <code>linkage</code>/<code>fcluster</code> imported mid-file</td></tr>
+        <tr><td><code>balance/balance.py</code></td><td class="num">~2.7k</td><td>Its own k-means; geographic-separation swaps; consolidation passes</td></tr>
+        <tr><td><code>road/road.py</code></td><td class="num">~4.2k</td><td>GraphML shortest paths behind <code>MockRoadNetwork</code>/<code>_LazyRoadNetwork</code>; corridor-signature matching; a proposal-based generate/validate/apply local search — a hand-rolled metaheuristic shell</td></tr>
+        <tr><td><code>safety/safety.py</code></td><td class="num">~2.8k</td><td>Gender segmentation and min-male-per-female-cluster rules; female rescue; <strong>a real Hungarian assignment</strong> (<code>solve_optimal_assignment_hungarian</code>)</td></tr>
+      </tbody>
+    </table></div>
+
+    <h3>Where runtime and cost actually go</h3>
+    <ul>
+      <li><strong>NetworkX shortest paths</strong> over a 53 MB GraphML (<code>roadNetwork/tricity_main_roads.graphml</code>) — and no builder script exists in the repo, so the graph's provenance is unknown and unrefreshable.</li>
+      <li><strong>Google Directions calls</strong>, rate-limited, per route (<code>ordering/google_optimizer.py</code>), with a haversine nearest-neighbor fallback that chains pickups from the office coordinates rather than the driver's position.</li>
+      <li>Config sprawl: <code>config.json</code> carries ~60 tuning knobs with a <code>mode_configs</code> override layer mirroring hardcoded thresholds in <code>roadNetwork/config.py</code>.</li>
+    </ul>
+    <p>At ucruise's scale — tens to low hundreds of riders, tens of drivers, ≤5 seats per vehicle — <strong>every solver in §3 solves the whole problem in well under a second</strong>. The pipeline stages exist because each heuristic was written locally; a solver replaces all of them with one global search whose quality is measured against published best-known solutions rather than against intuition.</p>
+  </section>
+
+  <section id="solvers">
+    <h2><span class="n">3</span>Solver options</h2>
+
+    <div class="tbl-wrap"><table>
+      <caption>Engines compared on ucruise's weighted criteria (quality · runtime · Google cost)</caption>
+      <thead><tr><th>Engine</th><th>License / stack</th><th>Method</th><th>Solution quality</th><th>At ucruise scale</th><th>Fit notes</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>PyVRP</strong></td>
+          <td class="mono">MIT · Python pkg</td>
+          <td>Hybrid genetic search</td>
+          <td><span class="chip good">Best</span> ~0.23% from best-known <span class="footnote">[1][2]</span></td>
+          <td><span class="chip good">Sub-second</span></td>
+          <td>Multi-depot, per-vehicle start/end depots, VRPTW, heterogeneous fleet, optional clients (unassigned-with-penalty), client groups, multi-trip. In-process pip install — the natural FastAPI fit. Safety pairing modeled via penalties/groups rather than a skills feature.</td>
+        </tr>
+        <tr>
+          <td><strong>VROOM</strong></td>
+          <td class="mono">BSD-2 · C++20 service</td>
+          <td>Metaheuristic + insertion</td>
+          <td><span class="chip good">Strong</span></td>
+          <td><span class="chip good">Milliseconds</span></td>
+          <td>Per-vehicle custom start/end, <strong>skills</strong> — the most direct encoding of gender-safety rules — plus shipments. Runs as a service (vroom-express) or C++ lib; pairs with OSRM/Valhalla natively. Maintained by Verso <span class="footnote">[3]</span>.</td>
+        </tr>
+        <tr>
+          <td><strong>OR-Tools</strong> (routing)</td>
+          <td class="mono">Apache-2 · C++/Python</td>
+          <td>Guided local search on the routing model <span class="footnote">(not CP-SAT)</span></td>
+          <td><span class="chip warn">~4% gap</span> <span class="footnote">[2]</span></td>
+          <td><span class="chip good">Sub-second</span></td>
+          <td>Broadest feature set: disjunctions (unassigned-with-penalty), arbitrary per-vehicle start/end, time windows. The flexibility fallback if a constraint defeats PyVRP's model.</td>
+        </tr>
+        <tr>
+          <td><strong>jsprit</strong></td>
+          <td class="mono">Apache-2 · Java/JVM</td>
+          <td>Ruin-and-recreate</td>
+          <td><span class="chip warn">Moderate</span></td>
+          <td><span class="chip warn">Fine, but JVM</span></td>
+          <td>Mature and flexible; requires a JVM sidecar for a Python stack. No advantage over the top three here.</td>
+        </tr>
+        <tr>
+          <td><strong>Timefold</strong></td>
+          <td class="mono">Apache-2 · Java (+Python alpha)</td>
+          <td>Constraint solver <span class="footnote">(OptaPlanner successor; Solver 2.0, Apr 2026)</span> <span class="footnote">[4]</span></td>
+          <td><span class="chip warn">Good</span></td>
+          <td><span class="chip bad">Python alpha</span></td>
+          <td>Excellent custom-constraint modeling, but the Python bindings are not production-ready. Revisit if rich business rules outgrow a VRP-shaped model.</td>
+        </tr>
+        <tr>
+          <td><strong>Google Route Optimization API</strong></td>
+          <td class="mono">Managed · per-shipment</td>
+          <td>Google fleet routing (OptimizeTours)</td>
+          <td><span class="chip good">Strong</span></td>
+          <td><span class="chip good">Managed</span></td>
+          <td>GA, <strong>$30 per 1,000 shipments</strong>, 1,000 free stops/mo, volume discounts <span class="footnote">[5][6]</span>. Replaces all optimization code but keeps per-run Google cost and dependency — contradicts the cost criterion at scale.</td>
+        </tr>
+      </tbody>
+    </table></div>
+
+    <p>The quality column matters most for the route-efficiency mode: PyVRP's measured gap to best-known solutions is roughly twenty times smaller than OR-Tools' on standard benchmarks <span class="footnote">[1][2]</span>, and Routific's public benchmark comparing VROOM, PyVRP and OR-Tools across 264 instances is a ready-made methodology if the team wants independent confirmation <span class="footnote">[7]</span>.</p>
+    <p><strong>Dead ends worth naming:</strong> MILP via Gurobi/CPLEX scales poorly for this use and adds license cost; writing another custom metaheuristic is exactly the situation being exited.</p>
+  </section>
+
+  <section id="roads">
+    <h2><span class="n">4</span>Road distances: the other half of the stack</h2>
+    <p>Every solver consumes a cost matrix. Today that role is split between haversine math, a 53 MB GraphML with NetworkX shortest paths, and rate-limited Google calls. A routing engine replaces all three with one honest source of road distances and times.</p>
+    <ul>
+      <li><strong>OSRM (recommended)</strong> — self-hosted Docker, Chandigarh-region OSM extract; <code>/table</code> serves the full driver×user×user matrix in milliseconds, <code>/route</code> returns geometry for the dashboard. No per-call cost.</li>
+      <li><strong>Valhalla</strong> — strong time-dependent matrix API and costing profiles; the alternative if turn penalties or costing flexibility matter.</li>
+      <li><strong>GraphHopper / openrouteservice</strong> — viable, heavier to self-host; ORS already embeds VROOM as its optimization engine.</li>
+      <li><strong>Keep Google (interim)</strong> — Routes API <code>computeRouteMatrix</code> can serve as the matrix source during migration; it removes the rate-limit-sensitive Directions loop but keeps per-element cost.</li>
+    </ul>
+    <p>Caveat to check early: OSM coverage quality for the tricity area. Spot-check 20 origin–destination pairs against Google before switching the default.</p>
+  </section>
+
+  <section id="target">
+    <h2><span class="n">5</span>Target architecture</h2>
+    <p>Five forks become one pipeline with profile configuration. Everything above the solve and below it stays: the external-API fetch, validation, response contract, caches, and the dashboard.</p>
+
+    <ol class="pipeline">
+      <li><span class="stage">Fetch + validate</span><span class="what">unchanged — <code>load_env_and_fetch_data</code>, <code>validate_input_data</code></span></li>
+      <li><span class="stage">Matrix service</span><span class="what">one <code>RoutingMatrix</code> interface; OSRM first, Google matrix as interim/fallback; results cached per data signature</span></li>
+      <li><span class="stage">Solver</span><span class="what">PyVRP model built from users + drivers; mode passed as a profile; solve in-process; warm-start from cached result</span></li>
+      <li><span class="stage">Response</span><span class="what">unchanged — <code>response_builder</code> keeps the existing payload contract, including <code>unassignedUsers</code>/<code>unassignedDrivers</code></span></li>
+      <li><span class="stage">Observability</span><span class="what">solver objective, gap, runtime, matrix cache hits logged per run</span></li>
+    </ol>
+
+    <div class="tbl-wrap"><table>
+      <caption>Modes → solver profiles (config, not code forks)</caption>
+      <thead><tr><th>Mode today</th><th>Becomes</th></tr></thead>
+      <tbody>
+        <tr><td>route_efficiency</td><td>minimize total distance</td></tr>
+        <tr><td>capacity_optimization</td><td>distance + seat-utilization penalty</td></tr>
+        <tr><td>balanced_optimization</td><td>distance + load-spread penalty (minimax on route length/load)</td></tr>
+        <tr><td>road-aware</td><td>same model, costs from the OSRM matrix instead of haversine</td></tr>
+        <tr><td>safety</td><td>gender pairing constraints (VROOM skills / PyVRP penalties) layered on any profile</td></tr>
+      </tbody>
+    </table></div>
+
+    <p>Side effect worth wanting: <code>config.json</code> shrinks from ~60 pipeline knobs to roughly 15 solver parameters (weights, unassigned penalty, max detour, time limit, matrix source), and the duplicate dispatch logic between <code>main.py</code> and <code>base.run_assignment</code> collapses to one entry point.</p>
+  </section>
+
+  <section id="roadmap">
+    <h2><span class="n">6</span>Migration roadmap</h2>
+    <p class="footnote">Each phase ships value on its own and is validated against the previous phase's baseline. No phase requires a big-bang switch.</p>
+
+    <div class="phase">
+      <div class="ph-head"><span class="ph-id">Phase 0</span><span class="ph-name">Baseline</span><span class="ph-tag"><span class="chip neutral">measurement only</span></span></div>
+      <p>Run <code>localTesting/run_and_view.py</code> for every mode and record: total distance, vehicles used, seat-utilization mean/max, unassigned counts, end-to-end runtime, Google calls per run.</p>
+      <div class="ph-meta">Touches: <code>localTesting/test_analysis.py</code> (extend analytics output to a baseline JSON). No product code changes.</div>
+    </div>
+
+    <div class="phase">
+      <div class="ph-head"><span class="ph-id">Phase 1</span><span class="ph-name">Routing matrix</span><span class="ph-tag"><span class="chip accent">kills GraphML + haversine costs</span></span></div>
+      <p>Introduce a <code>RoutingMatrix</code> interface with two implementations: OSRM (self-hosted, Chandigarh extract) and the Google matrix API. Point the road-aware costs at the interface; stop querying NetworkX shortest paths for optimization costs.</p>
+      <div class="ph-meta">Touches: new <code>routing/</code> module; <code>roadNetwork/</code> demoted to optional. Validate: 20-pair spot check vs Google; Phase-0 metrics unchanged or better.</div>
+    </div>
+
+    <div class="phase">
+      <div class="ph-head"><span class="ph-id">Phase 2</span><span class="ph-name">Solver-based pickup ordering</span><span class="ph-tag"><span class="chip accent">best value-per-risk</span></span></div>
+      <p>Replace the Google waypoint optimizer and its haversine fallback with matrix + solver ordering per route. Every mode's final sequences improve at once, and Google calls per run drop sharply.</p>
+      <div class="ph-meta">Touches: <code>ordering/</code> (new solver optimizer alongside <code>google_optimizer.py</code>, flag-controlled). Validate: sequence lengths vs Phase-1 baseline on identical data.</div>
+    </div>
+
+    <div class="phase">
+      <div class="ph-head"><span class="ph-id">Phase 3</span><span class="ph-name">Full solve per run</span><span class="ph-tag"><span class="chip accent">one engine replaces five pipelines</span></span></div>
+      <p>A solver pipeline builds the PyVRP model from users + drivers and produces all routes in one solve — clustering, assignment, sequencing, merging and splitting are no longer separate code paths. Output flows through the existing response builder; the old pipelines stay selectable behind a config flag.</p>
+      <div class="ph-meta">Touches: new <code>assignment/solver_pipeline.py</code>; <code>main.py</code> dispatch. Validate: shadow runs current-vs-solver on the same fetch; property checks (§7).</div>
+    </div>
+
+    <div class="phase">
+      <div class="ph-head"><span class="ph-id">Phase 4</span><span class="ph-name">Mode migration + retirement</span><span class="ph-tag"><span class="chip accent">config becomes the product</span></span></div>
+      <p>Port each mode's semantics as solver profiles, including the safety rules (min-male-per-female-cluster as constraints/penalties). Parity-check mode by mode, then flip the default and freeze the old pipelines for rollback.</p>
+      <div class="ph-meta">Touches: profile definitions in <code>config.json</code>; mode selection. Validate: per-mode parity report; safety-mode rule audit on real assignments.</div>
+    </div>
+  </section>
+
+  <section id="verify">
+    <h2><span class="n">7</span>Verifying parity</h2>
+    <ul>
+      <li><strong>Metrics</strong> (identical fetch, current vs solver): total distance, vehicle count, seat-utilization mean and std-dev, unassigned riders, runtime, external API calls.</li>
+      <li><strong>Shadow mode</strong>: run the solver pipeline in parallel with the current selection and log both results before anything changes for users.</li>
+      <li><strong>Golden cases</strong>: small instances (10 riders, 2–3 drivers) with hand-checkable optimal solutions, run in CI-style tests.</li>
+      <li><strong>Property checks</strong>: no route exceeds capacity; every rider appears in ≤ 1 route; every route ends at the office; safety mode produces no rule-violating cluster.</li>
+      <li><strong>Trade-off visibility</strong>: where distance and balance conflict, report both rather than one weighted number, so profile weights are tuned on evidence <span class="footnote">[7]</span>.</li>
+    </ul>
+
+    <h3>Open questions for the team</h3>
+    <ul>
+      <li>Do shift deadlines belong in the model as soft arrival targets? (Data has no time fields today — adding them upgrades the profile, not the architecture.)</li>
+      <li>Who hosts OSRM, and is a Docker host available? (The one new ops dependency in the plan.)</li>
+      <li>Confirm typical fleet size per run — it sets OSRM matrix sizing and solver time limits, though both are comfortable at any plausible scale.</li>
+    </ul>
+  </section>
+
+  <hr>
+  <section id="sources">
+    <h2><span class="n">§</span>Sources</h2>
+    <ol class="sources">
+      <li id="src1"><span class="src-id">[1]</span> <a href="https://pyvrp.org/setup/benchmarks.html">PyVRP — published benchmarks vs reference solvers</a></li>
+      <li id="src2"><span class="src-id">[2]</span> <a href="https://github.com/PyVRP/PyVRP/issues/453">PyVRP issue #453 — OR-Tools benchmark comparison (~0.23% vs ~4% gap)</a></li>
+      <li id="src3"><span class="src-id">[3]</span> <a href="https://github.com/VROOM-Project/vroom">VROOM-Project/vroom — active under Verso, C++20</a></li>
+      <li id="src4"><span class="src-id">[4]</span> <a href="https://github.com/TimefoldAI/timefold-solver/discussions/2036">Timefold Solver 2.0 discussion — Python bindings status</a></li>
+      <li id="src5"><span class="src-id">[5]</span> <a href="https://developers.google.com/maps/documentation/route-optimization/usage-and-billing">Google Route Optimization API — usage and billing</a></li>
+      <li id="src6"><span class="src-id">[6]</span> <a href="https://developers.google.com/maps/billing-and-pricing/pricing">Google Maps Platform pricing list</a></li>
+      <li id="src7"><span class="src-id">[7]</span> <a href="https://github.com/routific/route-quality-benchmark">Routific route-quality benchmark — VROOM / PyVRP / OR-Tools across 264 instances</a></li>
+      <li id="src8"><span class="src-id">[8]</span> <a href="https://project-osrm.org">OSRM — routing engine and /table matrix service</a></li>
+      <li id="src9"><span class="src-id">[9]</span> <a href="https://developers.google.com/optimization">Google OR-Tools — routing solver documentation</a></li>
+    </ol>
+    <p class="footnote">ucruise claims carry file references inline. External claims were verified 2026-11-18; the "5–23% ILP improvement" figure circulating in earlier notes remains unverified and is deliberately not cited as evidence.</p>
+  </section>
+
+</div>

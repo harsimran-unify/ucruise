@@ -44,10 +44,27 @@ class RoadNetworkManager:
             self._retry_delay = 2  # seconds
             self._load_thread = None
             self._use_mock = False
+            self._provider = None  # "matrix" | "graphml" | "mock"
             self._initialized = True
-            
+
             # Start loading immediately on initialization
             self.start_loading()
+
+    def _provider_pref(self):
+        """road_network.provider from config.json, resolved via __file__ so it
+        works regardless of CWD. 'matrix' prefers the routing package (OSRM /
+        Google Routes matrix, haversine last); it automatically falls back to
+        the GraphML graph when no external engine is reachable."""
+        try:
+            import json as _json
+            cfg_path = os.path.join(
+                os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+                'config.json')
+            with open(cfg_path, 'r') as f:
+                return (( _json.load(f).get('road_network') or {})
+                        .get('provider', 'matrix'))
+        except Exception:
+            return 'matrix'
     
     def start_loading(self, graphml_path=None):
         """Start loading road network in background with retry logic"""
@@ -63,6 +80,32 @@ class RoadNetworkManager:
 
         def load_worker():
             try:
+                # Phase 1 (solver migration): prefer the routing-matrix
+                # provider — no 53 MB GraphML load, road distances from
+                # OSRM / Google with haversine as the last resort. Falls
+                # back to the GraphML graph when no engine is reachable.
+                if self._provider_pref() == 'matrix':
+                    try:
+                        from routing import get_routing_chain
+                        chain = get_routing_chain()
+                        if chain.has_real_engine():
+                            from routing.road_adapter import MatrixRoadNetwork
+                            self.road_network = MatrixRoadNetwork(chain)
+                            self._provider = 'matrix'
+                            self._loaded = True
+                            self._use_mock = False
+                            logger.info(
+                                "✅ Road distances served by routing matrix "
+                                f"(primary engine: {chain.best_engine_name()})")
+                            return
+                        logger.warning(
+                            "⚠️ No routing engine reachable (OSRM down and no "
+                            "Google key?) — loading GraphML road network")
+                    except Exception as matrix_error:
+                        logger.warning(
+                            f"⚠️ Routing matrix provider failed ({matrix_error}) "
+                            "— loading GraphML road network")
+
                 while self._retry_count < self._max_retries and not self._loaded:
                     try:
                         logger.info(f"🔄 Attempt {self._retry_count + 1}/{self._max_retries}: Loading road network...")
@@ -71,6 +114,7 @@ class RoadNetworkManager:
                         self.road_network = road_network_module.RoadNetwork(graphml_path)
                         self._loaded = True
                         self._use_mock = False
+                        self._provider = 'graphml'
                         logger.info("✅ Road network loaded successfully!")
                         break
 
@@ -129,6 +173,7 @@ class RoadNetworkManager:
                 return path
 
         self.road_network = MockRoadNetwork()
+        self._provider = 'mock'
         logger.warning("⚠️ Using mock road network (limited functionality)")
     
     def get_road_network(self, wait_timeout=10, force_wait=False):
@@ -215,7 +260,8 @@ class RoadNetworkManager:
             'loading': self._loading,
             'using_mock': self._use_mock,
             'retry_count': self._retry_count,
-            'has_error': self._load_error is not None
+            'has_error': self._load_error is not None,
+            'provider': self._provider
         }
 
 # Global instance - starts loading immediately

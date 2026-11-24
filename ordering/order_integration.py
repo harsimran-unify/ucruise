@@ -26,6 +26,18 @@ class OrderIntegration:
         self.cache_enabled = self.config.get("route_ordering", {}).get("enable_route_cache", True)
         self.google_enabled = self.config.get("route_ordering", {}).get("enable_google_optimization", True)
         self.fallback_enabled = self.config.get("route_ordering", {}).get("fallback_to_haversine", True)
+        # Phase 2: "solver" runs TSP ordering over the routing chain first
+        # (free, cached, road distances when OSRM/Google engines are on) and
+        # keeps Google Directions as the fallback. "google" keeps today's
+        # behavior with the solver replacing the haversine fallback.
+        self.optimizer = self.config.get("route_ordering", {}).get("optimizer", "google")
+        self.solver_optimizer = None
+        if self.optimizer == "solver" or self.fallback_enabled:
+            try:
+                from .solver_optimizer import get_solver_optimizer
+                self.solver_optimizer = get_solver_optimizer()
+            except Exception as e:
+                logger.warning(f"Solver pickup optimizer unavailable ({e})")
 
         # Initialize components
         self.cache = RouteCache(self.db_name, self.algorithm_name) if self.cache_enabled else None
@@ -37,7 +49,7 @@ class OrderIntegration:
             logger.info(f"Route ordering cache is enabled for company '{self.db_name}' algorithm '{self.algorithm_name}'")
 
         logger.info(f"Order integration initialized for company '{self.db_name}' algorithm '{self.algorithm_name}' - Cache: {self.cache_enabled}, "
-                   f"Google: {self.google_enabled}, Fallback: {self.fallback_enabled}")
+                   f"Google: {self.google_enabled}, Fallback: {self.fallback_enabled}, Optimizer: {self.optimizer}")
 
     def _load_config(self) -> Dict[str, Any]:
         """Load configuration from config.json"""
@@ -84,8 +96,35 @@ class OrderIntegration:
         ]
 
         if not routes_needing_optimization:
-            logger.info("All routes have cached orders, no Google API calls needed")
+            logger.info("All routes have cached orders, no ordering calls needed")
             return routes
+
+        # Phase 2 solver-first path: TSP ordering over the routing chain
+        # (cached, free), with Google Directions reserved as fallback.
+        if self.optimizer == "solver" and self.solver_optimizer is not None:
+            try:
+                solved = self.solver_optimizer.optimize_routes(
+                    routes_needing_optimization, office_lat, office_lon)
+                ok = [r for r in solved if r.get("ordering_source") == "solver_tsp"]
+                failed = [r for r in solved if r.get("ordering_source") != "solver_tsp"]
+                logger.info(f"Solver TSP ordering: {len(ok)} routes ordered, "
+                            f"{len(failed)} need fallback")
+                if failed and self.google_enabled and self.google_optimizer and self.google_optimizer.is_enabled():
+                    g_ok, g_failed = batch_optimize_routes(
+                        failed, office_lat, office_lon,
+                        cache_results=self.cache_enabled, db_name=self.db_name,
+                        algorithm_name=self.algorithm_name)
+                    logger.info(f"Google fallback ordering: {len(g_ok)} ok, {len(g_failed)} failed")
+                    failed = g_failed
+                if failed and self.fallback_enabled:
+                    failed = self._apply_fallback_ordering(failed, office_lat, office_lon)
+                cached_routes = [r for r in routes if r.get("ordering_source") == "cached"]
+                if self.solver_optimizer is not None:
+                    self.solver_optimizer.save_cache()
+                return cached_routes + ok + failed
+            except Exception as e:
+                logger.error(f"Solver ordering failed ({e}); falling back to Google")
+                # fall through to the legacy Google path below
 
         # Step 3: Apply Google API optimization if enabled
         if self.google_enabled and self.google_optimizer and self.google_optimizer.is_enabled():
@@ -130,14 +169,11 @@ class OrderIntegration:
 
     def _apply_fallback_ordering(self, routes: List[Dict[str, Any]], office_lat: float, office_lon: float) -> List[Dict[str, Any]]:
         """
-        Apply fallback ordering using haversine distance calculations
-
-        Args:
-            routes: List of route dictionaries
-            office_lat, office_lon: Office coordinates
-
-        Returns:
-            Routes with fallback pickup_order applied
+        Apply fallback ordering for routes the primary optimizer could not
+        order. Phase 2: the haversine nearest-neighbor chains from the OFFICE
+        (wrong geometry — a commute ends at the office), so fallback ordering
+        now uses the solver TSP over the routing chain, which starts at the
+        driver and ends at the office.
         """
         logger.info(f"Applying fallback ordering to {len(routes)} routes")
 
@@ -145,7 +181,12 @@ class OrderIntegration:
 
         for route in routes:
             try:
-                enhanced_route = self._optimize_single_route_fallback(route, office_lat, office_lon)
+                if self.solver_optimizer is not None:
+                    enhanced_route = self.solver_optimizer.optimize_route(
+                        route, office_lat, office_lon)
+                else:
+                    enhanced_route = self._optimize_single_route_fallback(
+                        route, office_lat, office_lon)
                 enhanced_routes.append(enhanced_route)
             except Exception as e:
                 logger.error(f"Failed to apply fallback ordering to route {route.get('driver_id')}: {e}")

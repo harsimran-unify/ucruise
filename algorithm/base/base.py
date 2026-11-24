@@ -3335,20 +3335,45 @@ def run_assignment(source_id: str, parameter: int = 1, string_param: str = "", c
         # Get the algorithm priority from ride_settings (only used if safety_flag = 0)
         algorithm_priority = data.get("_algorithm_priority")
 
+        # Phase 3/4: solver pipeline replaces the legacy mode pipelines when
+        # config solver.enabled is true (safety stays legacy — gender
+        # constraints are not expressible in the VRP model).
+        try:
+            from algorithm.solver_opt.solver_pipeline import solver_enabled
+            use_solver = solver_enabled()
+        except Exception:
+            use_solver = False
+
         # Route to appropriate algorithm based on priority (normal flow when safety = 0)
         if algorithm_priority == 1:
+            if use_solver:
+                logger.info("🧩 Routing to SOLVER CAPACITY profile")
+                from algorithm.solver_opt.solver_pipeline import run_solver_capacity_assignment
+                return run_solver_capacity_assignment(source_id, parameter, string_param, choice)
             logger.info("🎪 Routing to CAPACITY OPTIMIZATION (assign_capacity.py)")
             from algorithm.capacity.capacity import run_assignment_capacity
             return run_assignment_capacity(source_id, parameter, string_param, choice)
         elif algorithm_priority == 2:
+            if use_solver:
+                logger.info("🧩 Routing to SOLVER BALANCED profile")
+                from algorithm.solver_opt.solver_pipeline import run_solver_balance_assignment
+                return run_solver_balance_assignment(source_id, parameter, string_param, choice)
             logger.info("⚖️ Routing to BALANCED OPTIMIZATION (assign_balance.py)")
             from algorithm.balance.balance import run_assignment_balance
             return run_assignment_balance(source_id, parameter, string_param, choice)
         elif algorithm_priority == 3:
+            if use_solver:
+                logger.info("🧩 Routing to SOLVER ROAD-AWARE profile")
+                from algorithm.solver_opt.solver_pipeline import run_solver_road_assignment
+                return run_solver_road_assignment(source_id, parameter, string_param, choice)
             logger.info("🗺️ Routing to ROAD-AWARE ROUTING (assign_route.py)")
             from algorithm.road.road import run_road_aware_assignment
             return run_road_aware_assignment(source_id, parameter, string_param, choice)
         else:
+            if use_solver:
+                logger.info("🧩 Using default SOLVER ROUTE-EFFICIENCY profile")
+                from algorithm.solver_opt.solver_pipeline import run_solver_route_efficiency_assignment
+                return run_solver_route_efficiency_assignment(source_id, parameter, string_param, choice)
             logger.info("🎯 Using default ROUTE EFFICIENCY algorithm (assignment.py)")
             # Continue with route efficiency algorithm (original assignment.py logic)
             return run_route_efficiency_assignment(source_id, parameter, string_param, choice)
