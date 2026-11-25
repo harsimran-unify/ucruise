@@ -8,7 +8,7 @@ import requests
 import time
 from typing import List, Dict, Any, Optional, Tuple
 from dotenv import load_dotenv
-from logger import get_logger
+from app.infrastructure.logging.logger import get_logger
 
 logger = get_logger()
 

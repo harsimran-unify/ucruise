@@ -8,7 +8,7 @@ Provides a unified interface for applying optimal pickup sequences.
 import json
 import os
 from typing import List, Dict, Any, Tuple
-from logger import get_logger
+from app.infrastructure.logging.logger import get_logger
 
 from .route_cache import RouteCache, apply_cached_orders
 from .google_optimizer import get_google_optimizer, batch_optimize_routes, read_user_coordinates

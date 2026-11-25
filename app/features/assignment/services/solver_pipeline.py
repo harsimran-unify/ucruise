@@ -31,74 +31,23 @@ Entry points mirror the legacy naming so dispatch, localTesting's
 ALGORITHM_MODES table, and the baseline harness can call them unchanged.
 """
 
-import json
-import os
 import time
 from typing import Any, Dict, List, Optional, Tuple
 
-from logger import get_logger
-from algorithm.base.base import (
-    load_env_and_fetch_data,
-    validate_input_data,
-    haversine_distance,
-)
-from algorithm.response.response_builder import (
+from app.core import config
+from app.infrastructure.logging.logger import get_logger
+from app.infrastructure.ordering.order_integration import get_order_integration
+from app.infrastructure.source_api import load_env_and_fetch_data
+from app.features.assignment.helpers.data_access import validate_input_data
+from app.features.assignment.helpers.pricebook.pricebook_calculator import calculate_pricebook_id
+from app.features.assignment.helpers.response_builder import (
     build_standard_response,
     create_error_response,
     log_response_metrics,
     save_standardized_response,
 )
-from ordering.order_integration import get_order_integration
 
 logger = get_logger()
-
-_PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
-MODE_LABELS = {
-    "route_efficiency": "solver_route_efficiency",
-    "capacity_optimization": "solver_capacity",
-    "balanced_optimization": "solver_balanced",
-    "road_aware_route_optimization": "solver_road_aware",
-}
-
-DEFAULT_PROFILE = {"drop_penalty_km": 40.0, "vehicle_fixed_cost_km": 6.0}
-
-
-def _load_solver_config() -> Dict[str, Any]:
-    cfg = {
-        "enabled": True,
-        "runtime_seconds": 3.0,
-        "seed": 1,
-        "drop_penalty_km": 40.0,
-        "vehicle_fixed_cost_km": 6.0,
-        "profiles": {},
-    }
-    try:
-        with open(os.path.join(_PROJECT_ROOT, "config.json"), "r", encoding="utf-8") as f:
-            file_cfg = json.load(f)
-        cfg.update(file_cfg.get("solver") or {})
-    except (OSError, json.JSONDecodeError) as e:
-        logger.warning(f"Could not read solver config ({e}); using defaults")
-    return cfg
-
-
-def _office_coordinates(data: Dict[str, Any]) -> Tuple[float, float]:
-    """Office from the API payload when present, else config.json."""
-    company = data.get("company") or {}
-    for lat_key, lon_key in (("latitude", "longitude"), ("lat", "lng")):
-        try:
-            lat = company.get(lat_key)
-            lon = company.get(lon_key)
-            if lat is not None and lon is not None:
-                return float(lat), float(lon)
-        except (TypeError, ValueError):
-            pass
-    try:
-        with open(os.path.join(_PROJECT_ROOT, "config.json"), "r", encoding="utf-8") as f:
-            cfg = json.load(f)
-        return float(cfg["office_latitude"]), float(cfg["office_longitude"])
-    except Exception:
-        return 30.6810489, 76.7260711  # documented office fallback
 
 
 def _driver_seats(driver: Dict[str, Any]) -> int:
@@ -125,6 +74,7 @@ def _user_records(data: Dict[str, Any]) -> List[Dict[str, Any]]:
                 "phone": u.get("phone"),
                 "address": u.get("address"),
                 "employee_shift": u.get("employee_shift"),
+                "shift_type": u.get("shift_type"),
             })
         except (KeyError, TypeError, ValueError):
             logger.warning(f"Skipping user with unusable fields: {u.get('id')}")
@@ -155,6 +105,15 @@ def _driver_records(data: Dict[str, Any]) -> List[Dict[str, Any]]:
                 "email": d.get("email"),
                 "vehicle_name": d.get("vehicle_name"),
                 "vehicle_no": d.get("vehicle_no"),
+                "chasis_no": d.get("chasis_no"),
+                "color": d.get("color"),
+                "registration_no": d.get("registration_no"),
+                "shift_type_id": d.get("shift_type_id"),
+                "office_distance": d.get("office_distance"),
+                "phone": d.get("phone"),
+                "address": d.get("address"),
+                "employee_shift": d.get("employee_shift"),
+                "shift_type": d.get("shift_type"),
             })
         except (KeyError, TypeError, ValueError):
             logger.warning(f"Skipping driver with unusable fields: {d.get('id')}")
@@ -180,13 +139,13 @@ def solve_instance(users: List[Dict[str, Any]],
         return [], list(range(n_users))
 
     drop_penalty_m = int(round(profile.get("drop_penalty_km",
-                                            DEFAULT_PROFILE["drop_penalty_km"]) * 1000))
+                                            config.SOLVER_PROFILE_DEFAULT["drop_penalty_km"]) * 1000))
     fixed_cost_m = int(round(profile.get("vehicle_fixed_cost_km",
-                                         DEFAULT_PROFILE["vehicle_fixed_cost_km"]) * 1000))
+                                         config.SOLVER_PROFILE_DEFAULT["vehicle_fixed_cost_km"]) * 1000))
 
     # Distance matrix over users + drivers + office, via the RoutingChain
     # (cached haversine now; OSRM/Google road distances when enabled).
-    from routing import get_routing_chain
+    from app.infrastructure.routing import get_routing_chain
     chain = get_routing_chain()
     coords = [(u["latitude"], u["longitude"]) for u in users] + \
              [(d["latitude"], d["longitude"]) for d in drivers] + [office]
@@ -239,25 +198,30 @@ def run_solver_assignment(source_id: str,
                           parameter: int = 1,
                           string_param: str = "",
                           choice: str = "",
-                          mode: str = "route_efficiency") -> Dict[str, Any]:
-    """One solver run for the given profile mode; standardized response out."""
+                          mode: str = "route_efficiency",
+                          data: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    """One solver run for the given profile mode; standardized response out.
+
+    `data` may carry an already-fetched API payload (the HTTP dispatch fetches
+    once for mode selection); when omitted the payload is fetched here.
+    """
     start_time = time.time()
-    label = MODE_LABELS.get(mode, f"solver_{mode}")
+    label = mode  # labels == config solver.profiles keys (canonical mode names)
     logger.info(f"🧩 Starting SOLVER assignment ({mode}) for {source_id}")
 
     try:
-        data = load_env_and_fetch_data(source_id, parameter, string_param, choice)
+        if data is None:
+            data = load_env_and_fetch_data(source_id, parameter, string_param, choice)
         if not data:
             raise ValueError("No data returned by the external API")
         validate_input_data(data)
 
-        cfg = _load_solver_config()
-        profile = dict(DEFAULT_PROFILE)
-        profile.update((cfg.get("profiles") or {}).get(mode) or {})
+        cfg = config.solver_config()
+        profile = config.solver_profile(mode)
 
         users = _user_records(data)
         drivers = _driver_records(data)
-        office = _office_coordinates(data)
+        office = config.office_coordinates(data)
         if not users or not drivers:
             raise ValueError(f"Empty instance: {len(users)} users, {len(drivers)} drivers")
 
@@ -281,7 +245,7 @@ def run_solver_assignment(source_id: str,
                 u = dict(users[c_idx])
                 u["pickup_order"] = rank
                 assigned.append(u)
-            routes.append({
+            route = {
                 "driver_id": d["driver_id"],
                 "vehicle_id": d["vehicle_id"],
                 "latitude": d["latitude"],
@@ -292,8 +256,18 @@ def run_solver_assignment(source_id: str,
                 "email": d.get("email"),
                 "vehicle_name": d.get("vehicle_name"),
                 "vehicle_no": d.get("vehicle_no"),
+                "chasis_no": d.get("chasis_no"),
+                "color": d.get("color"),
+                "registration_no": d.get("registration_no"),
+                "shift_type_id": d.get("shift_type_id"),
                 "assigned_users": assigned,
-            })
+            }
+            # Same pricebook rule as the legacy pipelines: pricebook nearest
+            # the farthest assigned user (membership, not stop order).
+            route["price_book_id"] = calculate_pricebook_id(
+                route=route, data=data,
+                company_lat=office[0], company_lon=office[1], logger=logger)
+            routes.append(route)
 
         unassigned_users = [dict(users[i]) for i in dropped]
         unassigned_drivers = [dict(drivers[d_idx])
@@ -320,6 +294,8 @@ def run_solver_assignment(source_id: str,
             unassigned_drivers=unassigned_drivers,
             optimization_mode=label,
             parameter=parameter,
+            company=data.get("company"),
+            shift=data.get("shift"),
             string_param=string_param,
             choice=choice,
             metadata={
@@ -339,7 +315,7 @@ def run_solver_assignment(source_id: str,
         return create_error_response(
             error_message=f"Solver assignment failed: {e}",
             execution_time=time.time() - start_time,
-            optimization_mode=MODE_LABELS.get(mode, "solver"),
+            optimization_mode=mode,
             parameter=parameter,
             string_param=string_param,
             choice=choice,
@@ -347,34 +323,38 @@ def run_solver_assignment(source_id: str,
 
 
 def solver_enabled() -> bool:
-    return bool(_load_solver_config().get("enabled", False))
+    return config.solver_enabled()
 
 
-# ---- Legacy-compatible entry points (one per mode) -------------------------
+# ---- Entry points (one per mode) -------------------------------------------
 
 def run_solver_route_efficiency_assignment(source_id: str, parameter: int = 1,
                                            string_param: str = "",
-                                           choice: str = "") -> Dict[str, Any]:
+                                           choice: str = "",
+                                           data: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
     return run_solver_assignment(source_id, parameter, string_param, choice,
-                                 mode="route_efficiency")
+                                 mode="route_efficiency", data=data)
 
 
 def run_solver_capacity_assignment(source_id: str, parameter: int = 1,
                                    string_param: str = "",
-                                   choice: str = "") -> Dict[str, Any]:
+                                   choice: str = "",
+                                   data: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
     return run_solver_assignment(source_id, parameter, string_param, choice,
-                                 mode="capacity_optimization")
+                                 mode="capacity_optimization", data=data)
 
 
 def run_solver_balance_assignment(source_id: str, parameter: int = 1,
                                   string_param: str = "",
-                                  choice: str = "") -> Dict[str, Any]:
+                                  choice: str = "",
+                                  data: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
     return run_solver_assignment(source_id, parameter, string_param, choice,
-                                 mode="balanced_optimization")
+                                 mode="balanced_optimization", data=data)
 
 
 def run_solver_road_assignment(source_id: str, parameter: int = 1,
                                string_param: str = "",
-                               choice: str = "") -> Dict[str, Any]:
+                               choice: str = "",
+                               data: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
     return run_solver_assignment(source_id, parameter, string_param, choice,
-                                 mode="road_aware_route_optimization")
+                                 mode="road_aware_route_optimization", data=data)

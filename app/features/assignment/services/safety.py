@@ -7,8 +7,8 @@ import json
 from functools import lru_cache
 from sklearn.cluster import DBSCAN
 import warnings
-from logger import get_logger
-from progress import ProgressTracker
+from app.infrastructure.logging.logger import get_logger
+from app.infrastructure.logging.progress import ProgressTracker
 
 warnings.filterwarnings('ignore')
 
@@ -18,49 +18,35 @@ progress = ProgressTracker()
 
 # Import ordering system for optimal pickup sequences
 try:
-    from ordering import apply_route_ordering
+    from app.infrastructure.ordering import apply_route_ordering
     ORDERING_AVAILABLE = True
 except ImportError:
     ORDERING_AVAILABLE = False
     logger.warning("Ordering system not available - routes will not have optimal pickup sequences")
 
-# Import algorithm-level caching system
-try:
-    from algorithm.algorithm_cache import get_algorithm_cache, is_cache_disabled
-    # Check configuration to enable/disable cache
-    if is_cache_disabled():
-        ALGORITHM_CACHE_AVAILABLE = False
-        logger.info("🚫 Algorithm caching is disabled via configuration - will run without caching")
-    else:
-        ALGORITHM_CACHE_AVAILABLE = True
-except ImportError:
-    ALGORITHM_CACHE_AVAILABLE = False
-    logger.warning("Algorithm cache system not available - will run without caching")
+# The legacy algorithm-level cache module was removed with the legacy
+# pipelines (it was disabled via config anyway).
+ALGORITHM_CACHE_AVAILABLE = False
 
 # Import pricebook calculator
-from algorithm.pricebook.pricebook_calculator import calculate_pricebook_id
+from app.features.assignment.helpers.pricebook.pricebook_calculator import calculate_pricebook_id
 
-# Import core functions from base module
-from algorithm.base.base import (
-    validate_input_data, load_env_and_fetch_data, extract_office_coordinates,
-    prepare_user_driver_dataframes, haversine_distance, calculate_bearing,
-    bearing_difference, normalize_bearing_difference, coords_to_km,
-    _get_all_drivers_as_unassigned, _convert_users_to_unassigned_format,
-    get_progress_tracker
+# Import shared helpers (extracted from the legacy base module)
+from app.core import config as app_config
+from app.infrastructure.source_api import load_env_and_fetch_data
+from app.features.assignment.helpers.data_access import (
+    validate_input_data, extract_office_coordinates,
+    prepare_user_driver_dataframes, _convert_users_to_unassigned_format
+)
+from app.features.assignment.helpers.geo import (
+    haversine_distance, calculate_bearing, bearing_difference, coords_to_km
 )
 
 # ================== SIMPLIFIED CONFIGURATION WITH FEMALE SAFETY ==================
 
 def load_simple_config():
     """Load simple, sensible configuration for geographic clustering with female safety"""
-    script_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-    config_path = os.path.join(script_dir, 'config.json')
-
-    try:
-        with open(config_path) as f:
-            cfg = json.load(f)
-    except (FileNotFoundError, json.JSONDecodeError):
-        cfg = {}
+    cfg = app_config.get_config()
 
     # Get female safety configuration
     mode_configs = cfg.get("mode_configs", {})
@@ -2354,7 +2340,7 @@ def run_safety_assignment_simplified(source_id: str, parameter: int = 1, string_
         users = data.get('users', [])
         if not users:
             logger.warning("No users found")
-            from algorithm.response.response_builder import build_standard_response
+            from app.features.assignment.helpers.response_builder import build_standard_response
             return build_standard_response(
                 status="true",
                 execution_time=0.0,
@@ -2376,7 +2362,7 @@ def run_safety_assignment_simplified(source_id: str, parameter: int = 1, string_
 
         if not all_drivers:
             logger.warning("No drivers available")
-            from algorithm.response.response_builder import build_standard_response
+            from app.features.assignment.helpers.response_builder import build_standard_response
             unassigned_users = _convert_users_to_unassigned_format(users)
             return build_standard_response(
                 status="true",
@@ -2407,7 +2393,7 @@ def run_safety_assignment_simplified(source_id: str, parameter: int = 1, string_
         # SAFETY STEP 5: Handle edge case - no males available
         if males_df.empty and not females_df.empty:
             logger.warning("No male passengers available. All female passengers will remain unassigned for safety.")
-            from algorithm.response.response_builder import build_standard_response
+            from app.features.assignment.helpers.response_builder import build_standard_response
             unassigned_users = _convert_users_to_unassigned_format(users)
             return build_standard_response(
                 status="true",
@@ -2725,7 +2711,7 @@ def run_safety_assignment_simplified(source_id: str, parameter: int = 1, string_
                 logger.error(f"Failed to save result to cache: {e}")
 
         # Import the standardized response builder
-        from algorithm.response.response_builder import (
+        from app.features.assignment.helpers.response_builder import (
             build_standard_response,
             save_standardized_response,
             log_response_metrics
@@ -2756,7 +2742,7 @@ def run_safety_assignment_simplified(source_id: str, parameter: int = 1, string_
 
     except Exception as e:
         logger.error(f"Female safety assignment failed: {e}", exc_info=True)
-        from algorithm.response.response_builder import create_error_response
+        from app.features.assignment.helpers.response_builder import create_error_response
         return create_error_response(
             error_message=f"Female safety assignment failed: {e}",
             execution_time=time.time() - start_time,

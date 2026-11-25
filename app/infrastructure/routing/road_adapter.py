@@ -1,8 +1,7 @@
 """
-MatrixRoadNetwork — drops into road.py in place of RoadNetwork (GraphML).
+MatrixRoadNetwork — a road-distance adapter over the RoutingChain.
 
-Implements exactly the surface road.py consumes (verified call sites in
-algorithm/road/road.py):
+Implements the RoadNetwork surface that consumers expect:
 
     get_road_distance(lat1, lon1, lat2, lon2)              -> km
     get_route_coherence_score(driver, users, office)       -> 0..1
@@ -10,13 +9,13 @@ algorithm/road/road.py):
     find_nearest_road_node(lat, lon)                       -> (None, None)
     simplify_path_nodes(path, max_nodes=10)                -> path
 
-The coherence and detour checks are ported from
-roadNetwork/roadNetwork.py::RoadNetwork with the NetworkX shortest-path
-backing replaced by the RoutingChain. One behavioural difference is
-deliberate: there are no road *nodes*, so find_nearest_road_node returns
-(None, None) — matching road.py's own MockRoadNetwork contract — and the
-graph-path-proximity check inside is_user_on_route_path is replaced by a
-distance-to-segment check against the driver->office line.
+Coherence and detour checks follow the former GraphML-backed RoadNetwork
+implementation, with shortest-path distances replaced by the RoutingChain.
+One behavioural difference is deliberate: there are no road *nodes*, so
+find_nearest_road_node returns (None, None) — matching the historical
+MockRoadNetwork contract — and the graph-path-proximity check inside
+is_user_on_route_path is replaced by a distance-to-segment check against
+the driver->office line.
 """
 
 import math
@@ -25,20 +24,20 @@ from typing import List, Optional, Tuple
 from .base import haversine_km
 from .chain import RoutingChain
 
-try:
-    from roadNetwork.config import RoadAwareConfig
-except Exception:  # pragma: no cover - config import should always work
-    class RoadAwareConfig:
-        MAX_REASONABLE_RATIO = 3.0
-        DEFAULT_NEAR_PATH_THRESHOLD_KM = 1.0
-        COHERENCE_TOLERANCE_DEFAULT = 0.1
-        COHERENCE_TOLERANCE_COVERAGE = 0.2
-        DIRECTIONAL_PENALTY_WEIGHT = 0.3
-        BACKTRACK_PENALTY_WEIGHT = 0.4
-        CORRIDOR_BONUS_WEIGHT = 0.2
-        SEQUENCE_PENALTY_WEIGHT = 0.1
-        MAX_BACKTRACK_PENALTY = 0.5
-        BACKTRACK_PENALTY_SCALE = 5.0
+class RoadAwareConfig:
+    """Road-awareness tuning constants (formerly roadNetwork/config.py;
+    only the attributes this adapter consumes were kept)."""
+
+    MAX_REASONABLE_RATIO = 3.0
+    DEFAULT_NEAR_PATH_THRESHOLD_KM = 1.0
+    COHERENCE_TOLERANCE_DEFAULT = 0.1
+    COHERENCE_TOLERANCE_COVERAGE = 0.2
+    DIRECTIONAL_PENALTY_WEIGHT = 0.3
+    BACKTRACK_PENALTY_WEIGHT = 0.4
+    CORRIDOR_BONUS_WEIGHT = 0.2
+    SEQUENCE_PENALTY_WEIGHT = 0.1
+    MAX_BACKTRACK_PENALTY = 0.5
+    BACKTRACK_PENALTY_SCALE = 5.0
 
 
 class MatrixRoadNetwork:

@@ -20,6 +20,9 @@ from .response_standards import (
 
 import json
 import logging
+import os
+
+from app.core.config import OUTPUT_DIR
 
 logger = logging.getLogger(__name__)
 
@@ -257,9 +260,11 @@ def save_standardized_response(response_data, filename="drivers_and_routes.json"
     """
 
     try:
-        with open(filename, 'w') as f:
+        # Relative filenames always land in the project root regardless of CWD
+        path = filename if os.path.isabs(filename) else os.path.join(OUTPUT_DIR, filename)
+        with open(path, 'w', encoding='utf-8') as f:
             json.dump(response_data, f, indent=2, ensure_ascii=False)
-        logger.info(f"Standardized response saved to {filename}")
+        logger.info(f"Standardized response saved to {path}")
     except Exception as e:
         logger.error(f"Failed to save response to {filename}: {e}")
 

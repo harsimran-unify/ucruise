@@ -14,6 +14,8 @@ import os
 import threading
 from typing import Optional
 
+from app.core.config import CONFIG_PATH
+
 from .base import HaversineEngine, RoutingEngine, haversine_km, validate_road_distance
 from .cache import PointDistanceCache
 from .chain import RoutingChain
@@ -23,7 +25,8 @@ __all__ = [
     "haversine_km", "validate_road_distance", "get_routing_chain",
 ]
 
-_PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+_CHAIN_CACHE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                 "cache", "point_distances.json")
 
 _chain_lock = threading.Lock()
 _chain: Optional[RoutingChain] = None
@@ -41,7 +44,7 @@ def _load_routing_config() -> dict:
         "max_reasonable_ratio": 3.0,
     }
     try:
-        with open(os.path.join(_PROJECT_ROOT, "config.json"), "r", encoding="utf-8") as f:
+        with open(CONFIG_PATH, "r", encoding="utf-8") as f:
             file_cfg = json.load(f)
         defaults.update(file_cfg.get("routing") or {})
     except (OSError, json.JSONDecodeError):
@@ -78,8 +81,7 @@ def get_routing_chain() -> RoutingChain:
         cache = None
         if cfg["cache_enabled"]:
             cache = PointDistanceCache(
-                path=os.path.join(_PROJECT_ROOT, "routing", "cache",
-                                  "point_distances.json"),
+                path=_CHAIN_CACHE_PATH,
                 max_entries=cfg["cache_max_entries"])
 
         _chain = RoutingChain(engines, cache=cache,

@@ -4,11 +4,14 @@ from datetime import datetime
 import json
 import glob
 
-def clear_logs(log_dir="logs"):
+from app.core.config import LOGS_DIR
+
+def clear_logs(log_dir=None):
     """Clear all existing log files before starting a new session"""
     import sys
     # Handle Windows console encoding issues
     safe_print = lambda msg: print(msg.encode(sys.stdout.encoding, errors='replace').decode(sys.stdout.encoding))
+    log_dir = str(log_dir or LOGS_DIR)
 
     if os.path.exists(log_dir):
         log_files = glob.glob(os.path.join(log_dir, "assignment_*.log"))
@@ -28,7 +31,8 @@ def clear_logs(log_dir="logs"):
         safe_print(f"[INFO] Log directory {log_dir}/ doesn't exist yet")
 
 class RouteAssignmentLogger:
-    def __init__(self, log_dir="logs"):
+    def __init__(self, log_dir=None):
+        log_dir = str(log_dir or LOGS_DIR)
         self.log_dir = log_dir
         os.makedirs(log_dir, exist_ok=True)
 

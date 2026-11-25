@@ -4,11 +4,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-A FastAPI service (ucruise) that assigns office-commute users to drivers, optimizes the routes, and sequences pickups. Users/drivers come from an external API; fine-grained pickup ordering uses the Google Maps Directions API.
+A FastAPI service (ucruise) that assigns office-commute users to drivers, optimizes the routes, and sequences pickups. Users/drivers come from an external API; fine-grained pickup ordering uses the routing engine chain (solver TSP, with Google Directions as an optional fallback).
+
+One assignment engine: a **PyVRP global solve** (per-mode profiles) replaces the former five standalone legacy pipelines. The legacy clustering→assignment→sequencing→merging pipelines, the roadNetwork GraphML module, and `requirements.txt` were removed; `algorithm/` and `roadNetwork/` no longer exist.
 
 ## Commands
 
-The project uses **uv** (see `pyproject.toml`, `.python-version`; `requirements.txt` is legacy and unpinned — pyproject pins `pydantic<2` because the code uses the v1 API). All Python commands go through `uv run`:
+The project uses **uv** (see `pyproject.toml`, `.python-version`). All Python commands go through `uv run`:
 
 ```powershell
 uv sync                                                # first setup / after dep changes
@@ -21,61 +23,81 @@ Local end-to-end harness — run from inside `localTesting/` (it derives the pro
 cd localTesting
 uv run python run_and_view.py [--source-id X --parameter 1 --string-param "Evening shift" --choice " "]
 uv run python test_analysis.py    # direct in-process test, no HTTP layer
-uv run python baseline_metrics.py [--only <mode>]  # Phase 0+ harness: runs all modes, writes baseline/*.json
-uv run python validate_routing.py [--pairs 20]     # Phase 1: road-distance spot check per engine
-uv run python test_solver_ordering.py              # Phase 2 unit test
-uv run python test_solver_pipeline.py              # Phase 3 unit test (synthetic PyVRP instances)
-uv run python test_road_adapter.py                 # Phase 1 unit test (MatrixRoadNetwork contract)
+uv run python baseline_metrics.py [--only <mode>]  # runs safety + all four solver profiles, writes baseline/*.json
+uv run python validate_routing.py [--pairs 20]     # road-distance spot check per engine
+uv run python test_solver_ordering.py              # unit test (ordering TSP)
+uv run python test_solver_pipeline.py              # unit test (synthetic PyVRP instances)
+uv run python test_road_adapter.py                 # unit test (MatrixRoadNetwork contract)
 ```
 
-There is no test suite or linter (an httpx dev-dependency enables FastAPI's TestClient for ad-hoc checks). Verification is manual: inspect the API response, `logs/assignment_*.log`, and the dashboard at `http://localhost:5000/visualize` (served from `localTesting/visualize.html` — its ALGORITHM sidebar loads `/routes-all`, switches per-mode results in memory, and triggers `/assign-drivers-all` on the local_server wrapper). Note: `localTesting/` is gitignored — dashboard fixes don't reach the server copy automatically.
+**Response-parity checking:** `localTesting/baseline/golden_*.json` hold legacy-pipeline reference payloads (gitignored — they contain user PII, never commit). Regenerate a golden by setting `solver.enabled: false` in config.json, running the server, POSTing `/assign-drivers/...`, and copying `drivers_and_routes.json`. Then compare:
 
-Key endpoints: `POST /assign-drivers/{source_id}/{parameter}/{string_param}/{choice}` (main assignment, single algorithm chosen by ride_settings), `GET /routes` (last result), `POST /pickup_order` and `POST /pickup_orderV2` (Google-based pickup reordering), `GET /health`. Locally only: `localTesting/local_server.py` wraps `main:app` with `/assign-drivers-all` (runs all five algorithms on the same parameters, returns `{all_modes, modes}`) and `/routes-all` — run via `localTesting/run_and_view.py`; never deployed.
+```powershell
+uv run python localTesting/diff_parity.py localTesting/baseline/golden_capacity.json drivers_and_routes_solver_capacity_optimization.json
+```
+
+(par files: golden_route_efficiency ↔ `drivers_and_routes_solver_route_efficiency.json`, golden_balance ↔ `..._balanced_optimization.json`, golden_road ↔ `..._road_aware_route_optimization.json`.)
+
+There is no test suite or linter (an httpx dev-dependency enables FastAPI's TestClient for ad-hoc checks). Verification is manual: inspect the API response, `logs/assignment_*.log`, and the dashboard at `http://localhost:5000/visualize` (served from `localTesting/visualize.html` — its ALGORITHM sidebar loads `/routes-all`, switches per-mode results in memory, and triggers `/assign-drivers-all` on the local_server wrapper). Note: `localTesting/` is gitignored — dashboard/harness fixes don't reach the server copy automatically. `localTesting/compare_orderings.py --regenerate-basemap` is dead (it needed networkx + the deleted GraphML).
+
+Key endpoints: `POST /assign-drivers/{source_id}/{parameter}/{string_param}/{choice}` (main assignment), `GET /routes` (last result), `POST /pickup_order` and `POST /pickup_orderV2` (pickup reordering), `GET /health`. Locally only: `localTesting/local_server.py` wraps `main:app` with `/assign-drivers-all` (runs safety + all four solver profiles on the same parameters) and `/routes-all` — run via `localTesting/run_and_view.py`; never deployed.
 
 ## Configuration
 
 - `.env` at project root (gitignored): `API_URL`, `API_AUTH_TOKEN` (external data API), `GOOGLE_MAPS_API_KEY`.
-- `config.json` at project root is the central tuning file for all algorithms. Per-mode values in `mode_configs` override top-level defaults; road-network thresholds in it mirror the hardcoded `RoadAwareConfig` in `roadNetwork/config.py`.
-- `disable_algorithm_cache: true` and `route_ordering.enable_route_cache: false` are both currently set — every run recomputes and hits Google fresh. `solver.enabled: true` routes the four non-safety modes to the PyVRP pipeline; `route_ordering.optimizer` is `"solver"` (decided 2026-11-19 — zero Google ordering calls; set `"google"` for Directions-ordered stops).
+- `config.json` at project root: `office_latitude/longitude`, `mode_configs.female_safety_optimization` (safety-only tuning), `solver` (enabled flag, runtime_seconds, seed, drop_penalty_km, vehicle_fixed_cost_km, `profiles` per mode), `routing` (engine chain), `route_ordering`. All paths/config resolve through `app/core/config.py` (project-root-anchored via `__file__`, so CWD no longer matters).
+- `disable_algorithm_cache` and the legacy clustering/merging knobs are gone with the legacy pipelines.
 
-## Assignment flow (main.py → algorithm/)
+## Assignment flow (main.py → app/features/assignment)
 
-1. The `/assign-drivers/...` endpoint fetches users/drivers from the external API via `load_env_and_fetch_data` in `algorithm/base/base.py` — a GET to `{API_URL}/{source_id}/{parameter}/{string_param}/{choice}` with a Bearer token.
-2. Algorithm selection (implemented in both main.py's endpoint and `run_assignment` in base.py, same rules):
-   - `safety == 1` in the API response overrides everything → `algorithm/safety/safety.py` (always legacy — gender pairing is not expressible in the VRP model)
-   - otherwise `ride_settings.pic_priority` (falling back to `drop_priority`): 1 → capacity, 2 → balanced, 3 → road-aware, anything else → route efficiency
-   - **when `config.json` `solver.enabled` is true (currently set), priorities 1/2/3/default route to the PyVRP solver pipeline** (`algorithm/solver_opt/solver_pipeline.py`) with the selected mode as its profile; set `solver.enabled: false` to return to the legacy pipelines
-   - any data-fetch error falls back to route efficiency (legacy)
-3. The result is shaped into the standardized payload defined by `algorithm/response/response_standards.py` and built by `response_builder.py` (`{status, execution_time, data, unassignedUsers, unassignedDrivers, optimization_mode, ...}`), written to `drivers_and_routes.json`, and returned. `GET /routes` reads that file back.
+1. The `/assign-drivers/...` endpoint (in `app/features/assignment/routes.py`) fetches users/drivers once via `load_env_and_fetch_data` in `app/infrastructure/source_api.py` — a GET to `{API_URL}/{source_id}/{parameter}/{string_param}/{choice}` with a Bearer token.
+2. Dispatch:
+   - `safety == 1` in the API response overrides everything → `app/features/assignment/services/safety.py` (dedicated gender-pairing pipeline; not expressible in the VRP model)
+   - otherwise `ride_settings.pic_priority` (falling back to `drop_priority`): 1 → `capacity_optimization`, 2 → `balanced_optimization`, 3 → `road_aware_route_optimization`, anything else → `route_efficiency` (endpoint relabels the default arm `route_efficiency_default`)
+3. The result is shaped into the standardized payload defined by `app/features/assignment/helpers/response_standards.py` and built by `response_builder.py` (`{status, execution_time, data, unassignedUsers, unassignedDrivers, optimization_mode, company, shift, parameter, string_param, choice, metadata}`), written to `drivers_and_routes.json` (+ per-profile `drivers_and_routes_solver_{mode}.json`), and returned. `GET /routes` reads that file back.
+4. Solver responses carry every field the legacy pipelines filled: `price_book_id` (pricebook nearest the farthest assigned user), driver vehicle details, user `shift_type`, top-level `company`/`shift`; `metadata` (engine/profile/solve_seconds/distance_source) is a solver addition. Output files are UTF-8 (older committed files were cp1252).
 
-## The five algorithm modules are intentionally self-contained
+## Structure (MedicraftAI-style layout)
 
-`algorithm/base/base.py` (route efficiency), `capacity/capacity.py`, `balance/balance.py`, `road/road.py`, and `safety/safety.py` are each ~2k–4k-line standalone pipelines (clustering → driver assignment → sequence optimization → merging/splitting → outlier handling). They share patterns, not code: a behavioral fix usually has to be mirrored across the variants. `base.py` additionally hosts the shared helpers the others reuse (config loading, `load_env_and_fetch_data`, geometry utilities).
+```
+main.py                              FastAPI app + routers + lifespan (log session start); entry point "main:app"
+app/core/config.py                   paths, .env credentials, config.json (cached), office coords, solver profiles
+app/infrastructure/
+  source_api.py                      load_env_and_fetch_data (external API client)
+  logging/logger.py, progress.py     session logger (logs/assignment_*.log), progress tracker
+  routing/                           OSRM → Google Routes matrix → haversine chain; cache/cache/point_distances.json
+  ordering/                          pickup-order layer: order_integration, solver_optimizer (TSP),
+                                     google_optimizer (Directions fallback), route_cache
+app/features/assignment/
+  routes.py                          /assign-drivers, /routes, /visualize
+  services/solver_pipeline.py        PyVRP global solve + per-profile entry points
+  services/safety.py                 dedicated female-safety pipeline
+  helpers/                           response_standards, response_builder, geo, data_access, pricebook/
+app/features/pickup_order/
+  routes.py, models.py, helpers.py   /pickup_order, /pickup_orderV2 (pydantic v1 API — do not modernize)
+```
+
+No `__init__.py` at the `app/` top levels (implicit namespace packages); the moved `routing/`, `ordering/`, `pricebook/` packages keep theirs.
 
 ## Caches
 
-- Algorithm-result cache (`algorithm/algorithm_cache.py`): whole-result caching per company + algorithm under `routesCache/`, keyed by a data signature.
-- Pickup-order cache (`ordering/route_cache.py`): per company + algorithm under `ordering/cache/`.
+- Pickup-order cache (`app/infrastructure/ordering/route_cache.py`): per company + algorithm under `app/infrastructure/ordering/cache/` (stale legacy-named subdirs were removed; `solver/` and `pickup_order_api/` remain).
+- Routing distance cache: `app/infrastructure/routing/cache/point_distances.json` with per-entry engine stamps.
+- The whole-result algorithm cache (`routesCache/`, `algorithm_cache.py`) was legacy-only and deleted; it was disabled in config anyway.
 
-## Pickup ordering (ordering/)
+## Pickup ordering (app/infrastructure/ordering/)
 
 `OrderIntegration.apply_optimal_ordering` chains: cached orders → primary optimizer → fallback. `route_ordering.optimizer` picks the primary: `"solver"` (current default — TSP over the routing chain: free, cached, starts from the driver, ends at the office) or `"google"` (Directions-ordered, per-call billed). The fallback is the solver TSP too; the old office-start nearest-neighbor is only kept as `_optimize_single_route_fallback` for direct callers.
 
-## Routing matrix (routing/)
+## Solver pipeline (app/features/assignment/services/solver_pipeline.py)
 
-One interface for road distances: OSRM (self-hosted, `OSRM_URL` env) → Google Routes matrix (billed per element, session budget `routing.google_element_budget`; the key currently needs the Routes API enabled in Cloud Console — it 403s) → haversine (always available). `road_network.provider` in config.json: `"matrix"` (default) uses `MatrixRoadNetwork` for the road-aware mode when any external engine is up, otherwise falls back to the GraphML graph automatically. Distances cache to `routing/cache/point_distances.json` with per-entry engine stamps.
-
-## Solver pipeline (algorithm/solver_opt/)
-
-`run_solver_assignment(mode=...)` — one PyVRP global solve replaces clustering→assignment→sequencing→merging→splitting: drivers are vehicle types (capacity, start depot = home, end depot = office), users are optional clients with a drop penalty, distances from `routing/`. `solver.profiles` in config.json tunes each mode (fixed cost per used vehicle + drop penalty) — capacity = high fixed cost (consolidate), balanced = low (spread). Dispatch gates: `solver.enabled` in main.py and base.run_assignment; safety mode never uses the solver. Depends on `pyvrp` (via uv).
-
-## Road network (roadNetwork/)
-
-`tricity_main_roads.graphml` (53 MB) is loaded into a NetworkX graph by `RoadNetwork` (`roadNetwork.py`). `RoadNetworkManager` (`router.py`) loads it in a background thread with retries; the road-aware algorithm uses `get_road_network(wait_timeout=...)`.
+One PyVRP global solve: drivers are vehicle types (capacity, start depot = home, end depot = office), users are optional clients with a drop penalty, distances from `app/infrastructure/routing/`. `solver.profiles` in config.json tunes each mode (fixed cost per used vehicle + drop penalty): capacity = high fixed cost (consolidate), balanced = low (spread), road_aware = same model as efficiency but road-truth matrix, route_efficiency = moderate. `solver.enabled` gates nothing anymore (the solver is the only non-safety engine; the flag remains as a config switch read by `app/core/config.py::solver_enabled`).
 
 ## Gotchas
 
-- Run the server from the project root: `.env`, `config.json`, the GraphML file, and output files like `drivers_and_routes.json` are resolved relative to CWD in some places and via `__file__` in others.
+- `uvicorn main:app` must stay the entry point (localTesting's run_and_view.py and deployment rely on it).
 - `string_param` can contain spaces (e.g. `Evening shift`) — URL-encode it when calling the API.
-- Each assignment run deletes the `drivers_and_routes*.json` output files first; `run_and_view.py` also clears `logs/assignment_*.log` — logs are per-session only.
-- The `algorithm/*` subpackages have no `__init__.py`; imports like `from algorithm.base.base import ...` rely on implicit namespace packages (Python 3.3+).
+- Each assignment run deletes the `drivers_and_routes*.json` output files first; `run_and_view.py` also clears `logs/assignment_*.log` — logs are per-session only (server session starts via FastAPI lifespan).
+- `pydantic` is pinned `<2` — the pickup_order models use the v1 API (`@validator`, `class Config`); do not modernize them and do not add `pydantic-settings`.
+- The old CWD gotcha is retired: output files, config, `.env`, logs, and caches are all resolved from the project root via `app/core/config.py` regardless of CWD.
+- `localTesting/` is gitignored — the dashboard, goldens, and harness fixes never propagate to a deployed server copy automatically.

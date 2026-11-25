@@ -9,14 +9,9 @@ dependencies = [
     "pydantic>=1.10,<2",  # code uses v1 API (@validator, class Config)
     "requests",
     "python-dotenv",
-    "numpy",
-    "pandas",
-    "scikit-learn",
-    "scipy",
-    "networkx",
-    "python-multipart",
-    "jinja2",
-    "aiofiles",
+    "numpy",        # safety pipeline
+    "pandas",       # safety pipeline + record preparation
+    "scikit-learn", # safety pipeline (DBSCAN)
     "pyvrp>=0.14.1",
 ]
 

@@ -24,7 +24,7 @@ import itertools
 import threading
 from typing import Any, Dict, List, Optional, Tuple
 
-from logger import get_logger
+from app.infrastructure.logging.logger import get_logger
 
 logger = get_logger()
 
@@ -98,7 +98,7 @@ class SolverPickupOptimizer:
     def __init__(self):
         self._lock = threading.Lock()
         try:
-            from routing import get_routing_chain
+            from app.infrastructure.routing import get_routing_chain
             self.chain = get_routing_chain()
         except Exception as e:
             logger.warning(f"RoutingChain unavailable ({e}); ordering falls "
@@ -108,8 +108,8 @@ class SolverPickupOptimizer:
     def _distance_km(self, a: Tuple[float, float], b: Tuple[float, float]) -> float:
         if self.chain is not None:
             return self.chain.point_distance_km(a[0], a[1], b[0], b[1])
-        from algorithm.base.base import haversine_distance
-        return haversine_distance(a[0], a[1], b[0], b[1])
+        from app.infrastructure.routing.base import haversine_km
+        return haversine_km(a[0], a[1], b[0], b[1])
 
     def optimize_pickup_sequence(self, driver_pos: Tuple[float, float],
                                  users: List[Dict[str, Any]],

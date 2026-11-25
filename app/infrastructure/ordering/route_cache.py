@@ -9,19 +9,22 @@ import os
 import time
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Tuple, Any
-from logger import get_logger
+from app.infrastructure.logging.logger import get_logger
 
 logger = get_logger()
+
+# Cache data lives beside the package (git-tracked default entries)
+_DEFAULT_CACHE_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "cache")
 
 
 class RouteCache:
     """Manages caching of optimized route pickup sequences with company and algorithm-specific persistent storage"""
 
-    def __init__(self, db_name: str, algorithm_name: str = "base", cache_dir: str = "ordering/cache"):
+    def __init__(self, db_name: str, algorithm_name: str = "base", cache_dir: str = None):
         self.db_name = db_name
         self.algorithm_name = algorithm_name
-        self.cache_dir = cache_dir
-        self.company_cache_dir = os.path.join(cache_dir, db_name)
+        self.cache_dir = cache_dir or _DEFAULT_CACHE_DIR
+        self.company_cache_dir = os.path.join(self.cache_dir, db_name)
         self.algorithm_cache_dir = os.path.join(self.company_cache_dir, algorithm_name)
         self.cache_file = os.path.join(self.algorithm_cache_dir, "route_cache.json")
 

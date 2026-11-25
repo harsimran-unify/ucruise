@@ -14,8 +14,8 @@ from typing import List, Optional, Tuple
 
 
 def haversine_km(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
-    """Great-circle distance in kilometers (same convention as
-    algorithm.base.base.haversine_distance)."""
+    """Great-circle distance in kilometers (same convention as the legacy
+    algorithm.base.base.haversine_distance this module replaced)."""
     lat1, lon1, lat2, lon2 = map(math.radians, [lat1, lon1, lat2, lon2])
     dlat = lat2 - lat1
     dlon = lon2 - lon1
